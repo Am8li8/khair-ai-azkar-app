@@ -6,11 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
-import { Clock, BookOpen, Bookmark } from 'lucide-react';
+import { Clock, BookOpen, Bookmark, Check } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { language, t } = useLanguage();
   const [completedZikrs, setCompletedZikrs] = useState<Record<string, Set<number>>>({});
+  const [activeTab, setActiveTab] = useState<string>('morning');
   
   // عرض الوقت بتوقيت القاهرة
   const [currentTime, setCurrentTime] = useState<string>(
@@ -55,11 +56,16 @@ const Home: React.FC = () => {
       };
     });
   };
+
+  // التعامل مع النقر على "عرض"
+  const handleViewCategory = (categoryId: string) => {
+    setActiveTab(categoryId);
+  };
   
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-center">
+        <h1 className="text-3xl font-bold text-center font-ibm-plex-arabic">
           {t('appName')}
         </h1>
         <div className="flex items-center text-khair-primary">
@@ -68,7 +74,7 @@ const Home: React.FC = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="morning" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8 overflow-x-auto">
           {allAzkarCategories.slice(0, 5).map(category => (
             <TabsTrigger key={category.id} value={category.id}>
@@ -90,22 +96,24 @@ const Home: React.FC = () => {
                   <Card 
                     key={zikr.id} 
                     className={`prayer-card overflow-hidden ${isCompleted ? 'border-khair-accent bg-opacity-10' : ''}`}
-                    onClick={() => handleZikrClick(category.id, zikr.id, zikr.count)}
+                    onClick={() => !isCompleted && handleZikrClick(category.id, zikr.id, zikr.count)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
-                        <Badge variant={isCompleted ? "outline" : "default"} className="mb-2">
+                        <Badge variant={isCompleted ? "outline" : "default"} className="mb-2 flex items-center gap-1">
+                          <span className="material-icons text-sm">repeat</span>
                           {language === 'ar' ? `التكرار: ${zikr.count}` : `Repeat: ${zikr.count}`}
                         </Badge>
                         {isCompleted && (
-                          <Badge variant="secondary" className="bg-khair-accent text-black">
+                          <Badge variant="secondary" className="bg-khair-accent text-black flex items-center gap-1">
+                            <Check size={14} />
                             {language === 'ar' ? 'تم' : 'Done'}
                           </Badge>
                         )}
                       </div>
                     </CardHeader>
                     <CardContent className="pb-3">
-                      <div className="whitespace-pre-line text-lg">
+                      <div className="whitespace-pre-line text-lg font-ibm-plex-arabic">
                         {language === 'ar' ? zikr.text : zikr.textEn}
                       </div>
                     </CardContent>
@@ -136,13 +144,14 @@ const Home: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Tabs defaultValue={category.id}>
-                    <TabsList className="w-full">
-                      <TabsTrigger value={category.id} className="w-full">
-                        {language === 'ar' ? 'عرض' : 'View'}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  <Button 
+                    variant="default" 
+                    className="w-full"
+                    onClick={() => handleViewCategory(category.id)}
+                  >
+                    <span className="material-icons mr-2">visibility</span>
+                    {language === 'ar' ? 'عرض' : 'View'}
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
