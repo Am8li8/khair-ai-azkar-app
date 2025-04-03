@@ -406,3 +406,62 @@ export const travelAzkar: AzkarCategory = {
     }
   ]
 };
+
+// Export the array of all Azkar categories
+export const allAzkarCategories: AzkarCategory[] = [
+  morningAzkar,
+  eveningAzkar,
+  sleepAzkar,
+  wakeupAzkar,
+  prayerOpeningAzkar,
+  afterTashahhudAzkar,
+  rukuSujudAzkar,
+  azanAzkar,
+  betweenSujudAzkar,
+  mosqueAzkar,
+  wuduAzkar,
+  afterFoodAzkar,
+  beforeFoodAzkar,
+  travelAzkar
+];
+
+// Add defaultTasbihOptions for the Tasbih component
+export interface TasbihOption {
+  id: string;
+  text: string;
+  textEn: string;
+  count: number;
+}
+
+export const defaultTasbihOptions: TasbihOption[] = [
+  {
+    id: 'subhanAllah',
+    text: 'سبحان الله',
+    textEn: 'Glory be to Allah',
+    count: 33
+  },
+  {
+    id: 'alhamdulillah',
+    text: 'الحمد لله',
+    textEn: 'Praise be to Allah',
+    count: 33
+  },
+  {
+    id: 'allahuAkbar',
+    text: 'الله أكبر',
+    textEn: 'Allah is the Greatest',
+    count: 34
+  },
+  {
+    id: 'lailahaillallah',
+    text: 'لا إله إلا الله',
+    textEn: 'There is no god but Allah',
+    count: 100
+  },
+  {
+    id: 'astaghfirullah',
+    text: 'أستغفر الله',
+    textEn: 'I seek forgiveness from Allah',
+    count: 100
+  }
+];
