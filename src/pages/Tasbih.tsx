@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { defaultTasbihOptions } from '@/data/azkar';
 import { toast } from '@/components/ui/use-toast';
-import { RotateCcw, Check } from 'lucide-react';
+import { RotateCcw, Check, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface TasbihState {
   selectedZikr: string;
@@ -17,6 +18,11 @@ interface TasbihState {
   currentCount: number;
   rounds: number;
   completedRounds: number;
+  history: Array<{
+    zikr: string;
+    count: number;
+    date: string;
+  }>;
 }
 
 const Tasbih: React.FC = () => {
@@ -28,7 +34,33 @@ const Tasbih: React.FC = () => {
     currentCount: 0,
     rounds: 3,
     completedRounds: 0,
+    history: [],
   });
+  
+  // عرض الوقت بتوقيت القاهرة
+  const [currentTime, setCurrentTime] = useState<string>(
+    new Date().toLocaleTimeString('ar-EG', {
+      timeZone: 'Africa/Cairo',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+  );
+  
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(
+        new Date().toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
+          timeZone: 'Africa/Cairo',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        })
+      );
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [language]);
   
   // استعادة حالة السبحة من التخزين المحلي عند تحميل الصفحة
   useEffect(() => {
@@ -80,12 +112,33 @@ const Tasbih: React.FC = () => {
   };
   
   const incrementCount = () => {
+    if (tasbihState.completedRounds >= tasbihState.rounds) {
+      // تم الانتهاء من جميع الجولات، لا يمكن التقدم أكثر
+      toast({
+        title: language === 'ar' ? 'اكتملت السبحة' : 'Tasbih Completed',
+        description: language === 'ar' 
+          ? 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد' 
+          : 'You have completed all rounds, reset to start again',
+        duration: 3000,
+      });
+      return;
+    }
+    
     setTasbihState(prev => {
       const newCount = prev.currentCount + 1;
       
       // إذا وصلنا للعدد المستهدف
       if (newCount >= prev.targetCount) {
         const newCompletedRounds = prev.completedRounds + 1;
+        const currentDate = new Date().toISOString();
+        const currentZikr = prev.selectedZikr === 'custom' ? prev.customZikr : getCurrentZikrText();
+        
+        // إضافة إلى سجل الأذكار
+        const newHistory = [...prev.history, {
+          zikr: currentZikr,
+          count: prev.targetCount,
+          date: currentDate
+        }];
         
         // إذا أكملنا جميع الجولات
         if (newCompletedRounds >= prev.rounds) {
@@ -110,6 +163,7 @@ const Tasbih: React.FC = () => {
           ...prev,
           currentCount: 0,
           completedRounds: newCompletedRounds,
+          history: newHistory
         };
       }
       
@@ -143,11 +197,21 @@ const Tasbih: React.FC = () => {
     return selected ? (language === 'ar' ? selected.text : selected.textEn) : '';
   };
   
+  const getProgressPercentage = () => {
+    return (tasbihState.currentCount / tasbihState.targetCount) * 100;
+  };
+  
   return (
     <div className="khair-container">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        {t('tasbih')}
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">
+          {t('tasbih')}
+        </h1>
+        <div className="flex items-center text-khair-primary">
+          <Clock className="mr-2" size={18} />
+          <span dir="ltr">{currentTime}</span>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="overflow-hidden">
@@ -220,7 +284,10 @@ const Tasbih: React.FC = () => {
         </Card>
         
         <div className="flex flex-col items-center justify-center">
-          <div className="tasbih-counter" onClick={incrementCount}>
+          <div 
+            className={`tasbih-counter ${tasbihState.completedRounds >= tasbihState.rounds ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`} 
+            onClick={incrementCount}
+          >
             <div className="counter-text">{tasbihState.currentCount}</div>
             <div className="counter-label">
               {getCurrentZikrText()}
@@ -229,6 +296,13 @@ const Tasbih: React.FC = () => {
               {language === 'ar' 
                 ? `${tasbihState.completedRounds} / ${tasbihState.rounds} جولات` 
                 : `${tasbihState.completedRounds} / ${tasbihState.rounds} rounds`}
+            </div>
+            
+            <div className="mt-4 w-4/5 bg-white/30 rounded-full h-2 overflow-hidden">
+              <div 
+                className="bg-white h-full rounded-full transition-all duration-300" 
+                style={{ width: `${getProgressPercentage()}%` }}
+              ></div>
             </div>
           </div>
           
@@ -256,6 +330,35 @@ const Tasbih: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {tasbihState.history.length > 0 && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>
+              {language === 'ar' ? 'سجل التسبيحات' : 'Tasbih History'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {tasbihState.history.slice(-5).reverse().map((entry, index) => (
+                <div key={index} className="flex justify-between items-center p-2 border-b">
+                  <div className="flex-1">
+                    <span className="font-medium">{entry.zikr}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <Badge variant="outline">
+                      {language === 'ar' ? `${entry.count} مرة` : `${entry.count} times`}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(entry.date).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
