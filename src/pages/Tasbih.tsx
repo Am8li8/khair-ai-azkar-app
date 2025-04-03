@@ -201,42 +201,6 @@ const Tasbih: React.FC = () => {
     return (tasbihState.currentCount / tasbihState.targetCount) * 100;
   };
   
-  const handleZikrSelect = (value: string) => {
-    const selected = defaultTasbihOptions.find(option => option.id === value);
-    setTasbihState(prev => ({
-      ...prev,
-      selectedZikr: value,
-      targetCount: selected ? selected.count : prev.targetCount,
-      currentCount: 0,
-      completedRounds: 0,
-    }));
-  };
-  
-  const handleCustomZikrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTasbihState(prev => ({
-      ...prev,
-      customZikr: e.target.value,
-      selectedZikr: 'custom',
-    }));
-  };
-  
-  const handleTargetCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTasbihState(prev => ({
-      ...prev,
-      targetCount: parseInt(e.target.value) || 1,
-      currentCount: 0,
-      completedRounds: 0,
-    }));
-  };
-  
-  const handleRoundsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTasbihState(prev => ({
-      ...prev,
-      rounds: parseInt(e.target.value) || 1,
-      completedRounds: 0,
-    }));
-  };
-  
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -368,7 +332,7 @@ const Tasbih: React.FC = () => {
         </div>
       </div>
       
-      {tasbihState.history.length > 0 && (
+      {tasbihState.history && tasbihState.history.length > 0 && (
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="font-ibm-plex-arabic">
