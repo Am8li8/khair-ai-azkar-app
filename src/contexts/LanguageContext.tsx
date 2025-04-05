@@ -1,11 +1,10 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-type Language = 'ar' | 'en';
+type Language = 'ar';
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
@@ -42,8 +41,6 @@ const translations: Record<Language, Record<string, string>> = {
     lightMode: 'الوضع الفاتح',
     language: 'اللغة',
     currentTime: 'الوقت الحالي',
-    hijriDate: 'التاريخ الهجري',
-    gregorianDate: 'التاريخ الميلادي',
     reset: 'إعادة تعيين',
     save: 'حفظ',
     totalRounds: 'عدد الجولات',
@@ -58,83 +55,31 @@ const translations: Record<Language, Record<string, string>> = {
     allahuAkbar: 'الله أكبر',
     lailahaillaAllah: 'لا إله إلا الله',
     astaghfirullah: 'أستغفر الله',
-    // المزيد من الترجمات...
-  },
-  en: {
-    appName: 'Khair',
-    home: 'Home',
-    morningAzkar: 'Morning Azkar',
-    eveningAzkar: 'Evening Azkar',
-    sleepAzkar: 'Sleep Azkar',
-    wakeupAzkar: 'Waking Up Azkar',
-    prayerOpeningAzkar: 'Prayer Opening',
-    afterTashahhudAzkar: 'After Tashahhud',
-    rukuSujudAzkar: 'Ruku and Sujud',
-    azanAzkar: 'Azan Azkar',
-    betweenSujudAzkar: 'Between Sujud',
-    mosqueAzkar: 'Mosque Azkar',
-    wuduAzkar: 'Wudu Azkar',
-    afterFoodAzkar: 'After Food',
-    beforeFoodAzkar: 'Before Food',
-    travelAzkar: 'Travel Supplication',
-    istikhaaraAzkar: 'Istikhaarah',
-    homeAzkar: 'Home Azkar',
-    clothesAzkar: 'New Clothes',
-    wearingClothesAzkar: 'Wearing Clothes',
-    removingClothesAzkar: 'Removing Clothes',
-    bathroomAzkar: 'Bathroom Azkar',
-    tasbih: 'Digital Tasbih',
-    quran: 'Quran',
-    prayerTimes: 'Prayer Times',
-    settings: 'Settings',
-    darkMode: 'Dark Mode',
-    lightMode: 'Light Mode',
-    language: 'Language',
-    currentTime: 'Current Time',
-    hijriDate: 'Hijri Date',
-    gregorianDate: 'Gregorian Date',
-    reset: 'Reset',
-    save: 'Save',
-    totalRounds: 'Total Rounds',
-    tasbihCount: 'Tasbih Count',
-    chooseZikr: 'Choose Zikr',
-    customZikr: 'Custom Zikr',
-    startTasbih: 'Start Tasbih',
-    completed: 'Completed',
-    target: 'Target',
-    subhanAllah: 'Subhan Allah',
-    alhamdulillah: 'Alhamdulillah',
-    allahuAkbar: 'Allahu Akbar',
-    lailahaillaAllah: 'La ilaha illa Allah',
-    astaghfirullah: 'Astaghfirullah',
-    // More translations...
+    view: 'عرض',
+    numberOfAzkar: 'عدد الأذكار',
+    more: 'المزيد...',
+    backToHome: 'العودة للرئيسية',
+    tasbihSettings: 'إعدادات السبحة',
+    tasbihHistory: 'سجل التسبيحات',
+    repeat: 'التكرار',
+    done: 'تم',
+    rounds: 'جولات',
+    congratulations: 'مبارك!',
+    completedAllRounds: 'تم إكمال جميع الجولات'
   }
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('ar');
-
-  useEffect(() => {
-    // تحقق من اللغة المحفوظة في المتصفح
-    const savedLanguage = localStorage.getItem('khair-language') as Language | null;
-    if (savedLanguage) {
-      setLanguageState(savedLanguage);
-    }
-  }, []);
+  const [language] = useState<Language>('ar');
 
   useEffect(() => {
     // تحديث اتجاه النص وسمة اللغة في HTML
     const htmlElement = document.documentElement;
     htmlElement.setAttribute('lang', language);
-    htmlElement.setAttribute('dir', language === 'ar' ? 'rtl' : 'ltr');
-    localStorage.setItem('khair-language', language);
+    htmlElement.setAttribute('dir', 'rtl');
   }, [language]);
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-  };
 
   // دالة الترجمة
   const t = (key: string): string => {
@@ -142,7 +87,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, t }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -8,11 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
 import { defaultTasbihOptions } from '@/data/azkar';
 import { toast } from '@/components/ui/use-toast';
-import { Clock, BookOpen, Check, RotateCcw } from 'lucide-react';
+import { BookOpen, Check, RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Link } from 'react-router-dom';
 
 interface TasbihState {
   selectedZikr: string;
@@ -29,7 +28,7 @@ interface TasbihState {
 }
 
 const Home: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [completedZikrs, setCompletedZikrs] = useState<Record<string, Set<number>>>({});
   const [activeTab, setActiveTab] = useState<string>('morning');
   
@@ -54,10 +53,10 @@ const Home: React.FC = () => {
     history: [],
   });
   
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(
-        new Date().toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
+        new Date().toLocaleTimeString('ar-EG', {
           timeZone: 'Africa/Cairo',
           hour: '2-digit',
           minute: '2-digit',
@@ -67,20 +66,46 @@ const Home: React.FC = () => {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [language]);
+  }, []);
   
   // استعادة حالة السبحة من التخزين المحلي عند تحميل الصفحة
-  React.useEffect(() => {
+  useEffect(() => {
     const savedState = localStorage.getItem('khair-tasbih-state');
     if (savedState) {
       setTasbihState(JSON.parse(savedState));
     }
+    
+    // استعادة الأذكار المكتملة
+    const savedCompletedZikrs = localStorage.getItem('khair-completed-zikrs');
+    if (savedCompletedZikrs) {
+      // تحويل الكائن المخزن إلى كائن مع مجموعات Set
+      const parsedCompletedZikrs = JSON.parse(savedCompletedZikrs);
+      const reconvertedCompletedZikrs: Record<string, Set<number>> = {};
+      
+      for (const categoryId in parsedCompletedZikrs) {
+        reconvertedCompletedZikrs[categoryId] = new Set(parsedCompletedZikrs[categoryId]);
+      }
+      
+      setCompletedZikrs(reconvertedCompletedZikrs);
+    }
   }, []);
   
   // حفظ حالة السبحة في التخزين المحلي كلما تغيرت
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('khair-tasbih-state', JSON.stringify(tasbihState));
   }, [tasbihState]);
+  
+  // حفظ الأذكار المكتملة في التخزين المحلي
+  useEffect(() => {
+    // تحويل كائن مع مجموعات Set إلى كائن قابل للتخزين في localStorage
+    const serializableCompletedZikrs: Record<string, number[]> = {};
+    
+    for (const categoryId in completedZikrs) {
+      serializableCompletedZikrs[categoryId] = Array.from(completedZikrs[categoryId]);
+    }
+    
+    localStorage.setItem('khair-completed-zikrs', JSON.stringify(serializableCompletedZikrs));
+  }, [completedZikrs]);
   
   // التعامل مع النقر على الذكر
   const handleZikrClick = (categoryId: string, zikrId: number, maxCount: number) => {
@@ -90,8 +115,20 @@ const Home: React.FC = () => {
       
       if (!newCategoryZikrs.has(zikrId)) {
         newCategoryZikrs.add(zikrId);
+        
+        toast({
+          title: 'تم تسجيل الذكر',
+          description: `تم تسجيل هذا الذكر بنجاح`,
+          duration: 3000,
+        });
       } else {
         newCategoryZikrs.delete(zikrId);
+        
+        toast({
+          title: 'تم إلغاء تسجيل الذكر',
+          description: `تم إلغاء تسجيل هذا الذكر`,
+          duration: 3000,
+        });
       }
       
       return {
@@ -116,6 +153,12 @@ const Home: React.FC = () => {
       currentCount: 0,
       completedRounds: 0,
     }));
+    
+    toast({
+      title: 'تم تغيير الذكر',
+      description: `تم اختيار ${selected?.text || 'ذكر مخصص'}`,
+      duration: 1500,
+    });
   };
   
   const handleCustomZikrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,10 +190,8 @@ const Home: React.FC = () => {
     if (tasbihState.completedRounds >= tasbihState.rounds) {
       // تم الانتهاء من جميع الجولات، لا يمكن التقدم أكثر
       toast({
-        title: language === 'ar' ? 'اكتملت السبحة' : 'Tasbih Completed',
-        description: language === 'ar' 
-          ? 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد' 
-          : 'You have completed all rounds, reset to start again',
+        title: 'اكتملت السبحة',
+        description: 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد',
         duration: 3000,
       });
       return;
@@ -160,12 +201,8 @@ const Home: React.FC = () => {
       const newCount = prev.currentCount + 1;
       
       // عرض رسالة تأكيد بعدد المرات
-      const countMessage = language === 'ar' 
-        ? `تم التكرار ${newCount} مرة` 
-        : `Counted ${newCount} times`;
-      
       toast({
-        title: countMessage,
+        title: `تم التكرار ${newCount} مرة`,
         duration: 1000,
       });
       
@@ -185,18 +222,14 @@ const Home: React.FC = () => {
         // إذا أكملنا جميع الجولات
         if (newCompletedRounds >= prev.rounds) {
           toast({
-            title: language === 'ar' ? 'مبارك!' : 'Congratulations!',
-            description: language === 'ar' 
-              ? `لقد أكملت ${prev.rounds} جولات من الذكر` 
-              : `You have completed ${prev.rounds} rounds of dhikr`,
+            title: 'مبارك!',
+            description: `لقد أكملت ${prev.rounds} جولات من الذكر`,
             duration: 3000,
           });
         } else {
           toast({
-            title: language === 'ar' ? 'أحسنت!' : 'Well done!',
-            description: language === 'ar' 
-              ? `أكملت جولة ${newCompletedRounds} من ${prev.rounds}` 
-              : `Completed round ${newCompletedRounds} of ${prev.rounds}`,
+            title: 'أحسنت!',
+            description: `أكملت جولة ${newCompletedRounds} من ${prev.rounds}`,
             duration: 1500,
           });
         }
@@ -224,23 +257,33 @@ const Home: React.FC = () => {
     }));
     
     toast({
-      title: language === 'ar' ? 'تم إعادة التعيين' : 'Reset Complete',
-      description: language === 'ar' ? 'تم إعادة تعيين العداد' : 'The counter has been reset',
+      title: 'تم إعادة التعيين',
+      description: 'تم إعادة تعيين العداد',
       duration: 1500,
     });
   };
   
   const getCurrentZikrText = () => {
     if (tasbihState.selectedZikr === 'custom') {
-      return tasbihState.customZikr || (language === 'ar' ? 'ذكر مخصص' : 'Custom Dhikr');
+      return tasbihState.customZikr || 'ذكر مخصص';
     }
     
     const selected = defaultTasbihOptions.find(option => option.id === tasbihState.selectedZikr);
-    return selected ? (language === 'ar' ? selected.text : selected.textEn) : '';
+    return selected ? selected.text : '';
   };
   
   const getProgressPercentage = () => {
     return (tasbihState.currentCount / tasbihState.targetCount) * 100;
+  };
+  
+  // إعادة ضبط جميع الأذكار المكتملة
+  const resetAllCompletedZikrs = () => {
+    setCompletedZikrs({});
+    toast({
+      title: 'تم إعادة التعيين',
+      description: 'تم إعادة تعيين جميع الأذكار المكتملة',
+      duration: 2000,
+    });
   };
   
   return (
@@ -250,8 +293,8 @@ const Home: React.FC = () => {
           {t('appName')}
         </h1>
         <div className="flex items-center text-khair-primary">
-          <Clock className="mr-2" size={18} />
-          <span dir="ltr">{currentTime}</span>
+          <span className="ml-2">{t('currentTime')}:</span>
+          <span dir="ltr" className="mr-2">{currentTime}</span>
         </div>
       </div>
       
@@ -259,18 +302,30 @@ const Home: React.FC = () => {
         <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8 overflow-x-auto">
           {allAzkarCategories.slice(0, 5).map(category => (
             <TabsTrigger key={category.id} value={category.id}>
-              {language === 'ar' ? category.title : category.titleEn}
+              {category.title}
             </TabsTrigger>
           ))}
-          <TabsTrigger value="tasbih">{language === 'ar' ? 'السبحة' : 'Tasbih'}</TabsTrigger>
+          <TabsTrigger value="tasbih">{t('tasbih')}</TabsTrigger>
           <TabsTrigger value="more">
-            {language === 'ar' ? 'المزيد...' : 'More...'}
+            {t('more')}
           </TabsTrigger>
         </TabsList>
         
         {allAzkarCategories.map(category => (
           <TabsContent key={category.id} value={category.id} className="mt-0">
             <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">{category.title}</h2>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={resetAllCompletedZikrs}
+                  className="font-ibm-plex-arabic"
+                >
+                  {t('reset')}
+                </Button>
+              </div>
+              
               {category.azkar.map((zikr) => {
                 const isCompleted = completedZikrs[category.id]?.has(zikr.id);
                 
@@ -284,25 +339,25 @@ const Home: React.FC = () => {
                       <div className="flex justify-between items-start">
                         <Badge variant={isCompleted ? "outline" : "default"} className="mb-2 flex items-center gap-1">
                           <span className="material-icons text-sm">repeat</span>
-                          {language === 'ar' ? `التكرار: ${zikr.count}` : `Repeat: ${zikr.count}`}
+                          {`${t('repeat')}: ${zikr.count}`}
                         </Badge>
                         {isCompleted && (
                           <Badge variant="secondary" className="bg-khair-accent text-black flex items-center gap-1">
                             <Check size={14} />
-                            {language === 'ar' ? 'تم' : 'Done'}
+                            {t('done')}
                           </Badge>
                         )}
                       </div>
                     </CardHeader>
                     <CardContent className="pb-3">
                       <div className="whitespace-pre-line text-lg font-ibm-plex-arabic">
-                        {language === 'ar' ? zikr.text : zikr.textEn}
+                        {zikr.text}
                       </div>
                     </CardContent>
                     <CardFooter className="pt-3 text-xs text-muted-foreground border-t flex items-start">
-                      <BookOpen size={14} className="mr-2 mt-0.5 flex-shrink-0" />
+                      <BookOpen size={14} className="ml-2 mt-0.5 flex-shrink-0" />
                       <p className="whitespace-pre-line">
-                        {language === 'ar' ? zikr.source : zikr.sourceEn}
+                        {zikr.source}
                       </p>
                     </CardFooter>
                   </Card>
@@ -317,26 +372,26 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="overflow-hidden">
               <CardHeader>
-                <CardTitle className="font-ibm-plex-arabic">{language === 'ar' ? 'إعدادات السبحة' : 'Tasbih Settings'}</CardTitle>
+                <CardTitle className="font-ibm-plex-arabic">{t('tasbihSettings')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="zikr-select" className="font-ibm-plex-arabic">{language === 'ar' ? 'اختر الذكر' : 'Choose Dhikr'}</Label>
+                  <Label htmlFor="zikr-select" className="font-ibm-plex-arabic">{t('chooseZikr')}</Label>
                   <Select 
                     value={tasbihState.selectedZikr} 
                     onValueChange={handleZikrSelect}
                   >
                     <SelectTrigger id="zikr-select">
-                      <SelectValue placeholder={language === 'ar' ? 'اختر الذكر' : 'Choose Dhikr'} />
+                      <SelectValue placeholder={t('chooseZikr')} />
                     </SelectTrigger>
                     <SelectContent>
                       {defaultTasbihOptions.map(option => (
                         <SelectItem key={option.id} value={option.id} className="font-ibm-plex-arabic">
-                          {language === 'ar' ? option.text : option.textEn} ({option.count})
+                          {option.text} ({option.count})
                         </SelectItem>
                       ))}
                       <SelectItem value="custom" className="font-ibm-plex-arabic">
-                        {language === 'ar' ? 'ذكر مخصص' : 'Custom Dhikr'}
+                        {t('customZikr')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -345,13 +400,13 @@ const Home: React.FC = () => {
                 {tasbihState.selectedZikr === 'custom' && (
                   <div className="space-y-2">
                     <Label htmlFor="custom-zikr" className="font-ibm-plex-arabic">
-                      {language === 'ar' ? 'الذكر المخصص' : 'Custom Dhikr'}
+                      {t('customZikr')}
                     </Label>
                     <Input
                       id="custom-zikr"
                       value={tasbihState.customZikr}
                       onChange={handleCustomZikrChange}
-                      placeholder={language === 'ar' ? "أدخل الذكر المخصص" : "Enter custom dhikr"}
+                      placeholder="أدخل الذكر المخصص"
                       className="font-ibm-plex-arabic"
                     />
                   </div>
@@ -359,7 +414,7 @@ const Home: React.FC = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="target-count" className="font-ibm-plex-arabic">
-                    {language === 'ar' ? 'عدد التكرار' : 'Target Count'}
+                    {t('tasbihCount')}
                   </Label>
                   <Input
                     id="target-count"
@@ -373,7 +428,7 @@ const Home: React.FC = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="rounds" className="font-ibm-plex-arabic">
-                    {language === 'ar' ? 'عدد الجولات' : 'Number of Rounds'}
+                    {t('totalRounds')}
                   </Label>
                   <Input
                     id="rounds"
@@ -387,8 +442,8 @@ const Home: React.FC = () => {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full font-ibm-plex-arabic" onClick={resetTasbih}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  {language === 'ar' ? 'إعادة التعيين' : 'Reset'}
+                  <RotateCcw className="ml-2 h-4 w-4" />
+                  {t('reset')}
                 </Button>
               </CardFooter>
             </Card>
@@ -403,9 +458,7 @@ const Home: React.FC = () => {
                   {getCurrentZikrText()}
                 </div>
                 <div className="text-sm mt-2 font-ibm-plex-arabic">
-                  {language === 'ar' 
-                    ? `${tasbihState.completedRounds} / ${tasbihState.rounds} جولات` 
-                    : `${tasbihState.completedRounds} / ${tasbihState.rounds} rounds`}
+                  {`${tasbihState.completedRounds} / ${tasbihState.rounds} ${t('rounds')}`}
                 </div>
                 
                 <div className="mt-4 w-4/5 bg-white/30 rounded-full h-2 overflow-hidden">
@@ -419,7 +472,7 @@ const Home: React.FC = () => {
               <div className="flex justify-center mt-4 space-x-4 rtl:space-x-reverse">
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground font-ibm-plex-arabic">
-                    {language === 'ar' ? 'الجولات المكتملة' : 'Completed'}
+                    {t('completed')}
                   </div>
                   <div className="text-2xl font-bold">{tasbihState.completedRounds}</div>
                 </div>
@@ -428,7 +481,7 @@ const Home: React.FC = () => {
                 
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground font-ibm-plex-arabic">
-                    {language === 'ar' ? 'الهدف' : 'Target'}
+                    {t('target')}
                   </div>
                   <div className="text-2xl font-bold">{tasbihState.rounds}</div>
                 </div>
@@ -437,8 +490,8 @@ const Home: React.FC = () => {
               {tasbihState.completedRounds >= tasbihState.rounds && (
                 <div className="mt-4 text-center">
                   <Button variant="default" className="bg-khair-accent text-black hover:bg-khair-accent/90 font-ibm-plex-arabic">
-                    <Check className="mr-2 h-4 w-4" />
-                    {language === 'ar' ? 'مبارك! تم إكمال جميع الجولات' : 'Congratulations! All rounds completed'}
+                    <Check className="ml-2 h-4 w-4" />
+                    {t('congratulations')}! {t('completedAllRounds')}
                   </Button>
                 </div>
               )}
@@ -450,7 +503,7 @@ const Home: React.FC = () => {
             <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="font-ibm-plex-arabic">
-                  {language === 'ar' ? 'سجل التسبيحات' : 'Tasbih History'}
+                  {t('tasbihHistory')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -460,12 +513,12 @@ const Home: React.FC = () => {
                       <div className="flex-1">
                         <span className="font-medium font-ibm-plex-arabic">{entry.zikr}</span>
                       </div>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <div className="flex items-center gap-2">
                         <Badge variant="outline" className="font-ibm-plex-arabic">
-                          {language === 'ar' ? `${entry.count} مرة` : `${entry.count} times`}
+                          {`${entry.count} مرة`}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {new Date(entry.date).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                          {new Date(entry.date).toLocaleString('ar-EG')}
                         </span>
                       </div>
                     </div>
@@ -481,12 +534,9 @@ const Home: React.FC = () => {
             {allAzkarCategories.slice(5).map(category => (
               <Card key={category.id} className="cursor-pointer hover:border-khair-accent transition-colors">
                 <CardHeader>
-                  <CardTitle>{language === 'ar' ? category.title : category.titleEn}</CardTitle>
+                  <CardTitle>{category.title}</CardTitle>
                   <CardDescription>
-                    {language === 'ar' 
-                      ? `عدد الأذكار: ${category.azkar.length}` 
-                      : `Number of azkar: ${category.azkar.length}`
-                    }
+                    {`${t('numberOfAzkar')}: ${category.azkar.length}`}
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
@@ -496,7 +546,7 @@ const Home: React.FC = () => {
                     onClick={() => handleViewCategory(category.id)}
                   >
                     <span className="material-icons mr-2">visibility</span>
-                    {language === 'ar' ? 'عرض' : 'View'}
+                    {t('view')}
                   </Button>
                 </CardFooter>
               </Card>

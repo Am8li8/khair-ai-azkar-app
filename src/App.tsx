@@ -9,7 +9,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Home from "@/pages/Home";
-import Tasbih from "@/pages/Tasbih";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,8 +26,6 @@ const App = () => (
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/tasbih" element={<Tasbih />} />
-                  {/* أضف المزيد من المسارات هنا */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
