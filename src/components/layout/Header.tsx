@@ -16,9 +16,12 @@ const Header: React.FC = () => {
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <h1 className="text-2xl font-bold text-khair-primary font-ibm-plex-arabic">
-              {t('appName')}
-            </h1>
+            <img 
+              src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
+              alt={t('appName')} 
+              className="h-10 w-auto"
+              title={t('appName')}
+            />
           </Link>
         </div>
         
