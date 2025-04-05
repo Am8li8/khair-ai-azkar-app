@@ -127,6 +127,16 @@ const Tasbih: React.FC = () => {
     setTasbihState(prev => {
       const newCount = prev.currentCount + 1;
       
+      // عرض رسالة تأكيد بعدد المرات
+      const countMessage = language === 'ar' 
+        ? `تم التكرار ${newCount} مرة` 
+        : `Counted ${newCount} times`;
+      
+      toast({
+        title: countMessage,
+        duration: 1000,
+      });
+      
       // إذا وصلنا للعدد المستهدف
       if (newCount >= prev.targetCount) {
         const newCompletedRounds = prev.completedRounds + 1;
@@ -134,7 +144,7 @@ const Tasbih: React.FC = () => {
         const currentZikr = prev.selectedZikr === 'custom' ? prev.customZikr : getCurrentZikrText();
         
         // إضافة إلى سجل الأذكار
-        const newHistory = [...prev.history, {
+        const newHistory = [...(prev.history || []), {
           zikr: currentZikr,
           count: prev.targetCount,
           date: currentDate
