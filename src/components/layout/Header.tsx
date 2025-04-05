@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Home } from 'lucide-react';
+import { Home, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,7 +25,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           {location.pathname !== '/' && (
             <Button
-              variant="outline"
+              variant="default"
               className="font-ibm-plex-arabic"
               asChild
             >
