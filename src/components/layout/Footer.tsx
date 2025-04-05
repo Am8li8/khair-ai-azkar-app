@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sun, Moon } from 'lucide-react';
 
 const Footer: React.FC = () => {
-  const { language, t, setLanguage } = useLanguage();
+  const { language, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   
   return (
@@ -21,14 +21,6 @@ const Footer: React.FC = () => {
           >
             {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             {theme === 'light' ? t('darkMode') : t('lightMode')}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-          >
-            {language === 'ar' ? 'English' : 'العربية'}
           </Button>
         </div>
         

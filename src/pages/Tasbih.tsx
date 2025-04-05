@@ -50,7 +50,7 @@ const Tasbih: React.FC = () => {
   React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(
-        new Date().toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
+        new Date().toLocaleTimeString('ar-EG', {
           timeZone: 'Africa/Cairo',
           hour: '2-digit',
           minute: '2-digit',
@@ -60,7 +60,7 @@ const Tasbih: React.FC = () => {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [language]);
+  }, []);
   
   // استعادة حالة السبحة من التخزين المحلي عند تحميل الصفحة
   useEffect(() => {
@@ -115,10 +115,8 @@ const Tasbih: React.FC = () => {
     if (tasbihState.completedRounds >= tasbihState.rounds) {
       // تم الانتهاء من جميع الجولات، لا يمكن التقدم أكثر
       toast({
-        title: language === 'ar' ? 'اكتملت السبحة' : 'Tasbih Completed',
-        description: language === 'ar' 
-          ? 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد' 
-          : 'You have completed all rounds, reset to start again',
+        title: 'اكتملت السبحة',
+        description: 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد',
         duration: 3000,
       });
       return;
@@ -128,9 +126,7 @@ const Tasbih: React.FC = () => {
       const newCount = prev.currentCount + 1;
       
       // عرض رسالة تأكيد بعدد المرات
-      const countMessage = language === 'ar' 
-        ? `تم التكرار ${newCount} مرة` 
-        : `Counted ${newCount} times`;
+      const countMessage = `تم التكرار ${newCount} مرة`;
       
       toast({
         title: countMessage,
@@ -153,18 +149,14 @@ const Tasbih: React.FC = () => {
         // إذا أكملنا جميع الجولات
         if (newCompletedRounds >= prev.rounds) {
           toast({
-            title: language === 'ar' ? 'مبارك!' : 'Congratulations!',
-            description: language === 'ar' 
-              ? `لقد أكملت ${prev.rounds} جولات من الذكر` 
-              : `You have completed ${prev.rounds} rounds of dhikr`,
+            title: 'مبارك!',
+            description: `لقد أكملت ${prev.rounds} جولات من الذكر`,
             duration: 3000,
           });
         } else {
           toast({
-            title: language === 'ar' ? 'أحسنت!' : 'Well done!',
-            description: language === 'ar' 
-              ? `أكملت جولة ${newCompletedRounds} من ${prev.rounds}` 
-              : `Completed round ${newCompletedRounds} of ${prev.rounds}`,
+            title: 'أحسنت!',
+            description: `أكملت جولة ${newCompletedRounds} من ${prev.rounds}`,
             duration: 1500,
           });
         }
@@ -192,19 +184,19 @@ const Tasbih: React.FC = () => {
     }));
     
     toast({
-      title: language === 'ar' ? 'تم إعادة التعيين' : 'Reset Complete',
-      description: language === 'ar' ? 'تم إعادة تعيين العداد' : 'The counter has been reset',
+      title: 'تم إعادة التعيين',
+      description: 'تم إعادة تعيين العداد',
       duration: 1500,
     });
   };
   
   const getCurrentZikrText = () => {
     if (tasbihState.selectedZikr === 'custom') {
-      return tasbihState.customZikr || (language === 'ar' ? 'ذكر مخصص' : 'Custom Dhikr');
+      return tasbihState.customZikr || 'ذكر مخصص';
     }
     
     const selected = defaultTasbihOptions.find(option => option.id === tasbihState.selectedZikr);
-    return selected ? (language === 'ar' ? selected.text : selected.textEn) : '';
+    return selected ? selected.text : '';
   };
   
   const getProgressPercentage = () => {
@@ -241,7 +233,7 @@ const Tasbih: React.FC = () => {
                 <SelectContent>
                   {defaultTasbihOptions.map(option => (
                     <SelectItem key={option.id} value={option.id} className="font-ibm-plex-arabic">
-                      {language === 'ar' ? option.text : option.textEn} ({option.count})
+                      {option.text} ({option.count})
                     </SelectItem>
                   ))}
                   <SelectItem value="custom" className="font-ibm-plex-arabic">{t('customZikr')}</SelectItem>
@@ -256,7 +248,7 @@ const Tasbih: React.FC = () => {
                   id="custom-zikr"
                   value={tasbihState.customZikr}
                   onChange={handleCustomZikrChange}
-                  placeholder={language === 'ar' ? "أدخل الذكر المخصص" : "Enter custom dhikr"}
+                  placeholder="أدخل الذكر المخصص"
                   className="font-ibm-plex-arabic"
                 />
               </div>
@@ -304,9 +296,7 @@ const Tasbih: React.FC = () => {
               {getCurrentZikrText()}
             </div>
             <div className="text-sm mt-2 font-ibm-plex-arabic">
-              {language === 'ar' 
-                ? `${tasbihState.completedRounds} / ${tasbihState.rounds} جولات` 
-                : `${tasbihState.completedRounds} / ${tasbihState.rounds} rounds`}
+              {`${tasbihState.completedRounds} / ${tasbihState.rounds} جولات`}
             </div>
             
             <div className="mt-4 w-4/5 bg-white/30 rounded-full h-2 overflow-hidden">
@@ -335,7 +325,7 @@ const Tasbih: React.FC = () => {
             <div className="mt-4 text-center">
               <Button variant="default" className="bg-khair-accent text-black hover:bg-khair-accent/90 font-ibm-plex-arabic">
                 <Check className="mr-2 h-4 w-4" />
-                {language === 'ar' ? 'مبارك! تم إكمال جميع الجولات' : 'Congratulations! All rounds completed'}
+                {'مبارك! تم إكمال جميع الجولات'}
               </Button>
             </div>
           )}
@@ -346,7 +336,7 @@ const Tasbih: React.FC = () => {
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="font-ibm-plex-arabic">
-              {language === 'ar' ? 'سجل التسبيحات' : 'Tasbih History'}
+              {'سجل التسبيحات'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -358,10 +348,10 @@ const Tasbih: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="outline" className="font-ibm-plex-arabic">
-                      {language === 'ar' ? `${entry.count} مرة` : `${entry.count} times`}
+                      {`${entry.count} مرة`}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(entry.date).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                      {new Date(entry.date).toLocaleString('ar-EG')}
                     </span>
                   </div>
                 </div>
