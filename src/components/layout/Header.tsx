@@ -19,7 +19,7 @@ const Header: React.FC = () => {
             <img 
               src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
               alt={t('appName')} 
-              className="h-10 w-auto"
+              className="h-14 w-auto" // Increased from h-10 to h-14
               title={t('appName')}
             />
           </Link>
