@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
           <img 
             src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
             alt={t('appName')} 
-            className="h-16 w-auto" // Increased from h-10 to h-16
+            className="h-20 w-auto" // Increased from h-16 to h-20
           />
           <p className="text-center text-muted-foreground text-sm mr-2">
             &copy; {new Date().getFullYear()}
