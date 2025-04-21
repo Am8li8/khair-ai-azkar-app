@@ -19,13 +19,23 @@ const Header: React.FC = () => {
             <img 
               src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
               alt={t('appName')} 
-              className="h-28 w-auto" // Increased from h-24 to h-28
+              className="h-28 w-auto"
               title={t('appName')}
             />
           </Link>
         </div>
-        
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <Link
+            to="/quran"
+            className={`font-ibm-plex-arabic px-4 py-2 rounded transition bg-khair-accent/30 hover:bg-khair-accent/60 text-black font-bold text-lg
+              ${location.pathname.startsWith("/quran") ? "border-b-2 border-khair-accent" : ""}
+            `}
+            style={{
+              textShadow: "0 1px 2px rgba(0,0,0,0.08)"
+            }}
+          >
+            القرآن الكريم
+          </Link>
           {location.pathname !== '/' && (
             <Button
               variant="default"
@@ -38,7 +48,6 @@ const Header: React.FC = () => {
               </Link>
             </Button>
           )}
-          
           <Button
             variant="ghost"
             size="icon"

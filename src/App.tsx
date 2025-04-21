@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
+import Quran from "@/pages/Quran";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +26,7 @@ const App = () => (
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/quran" element={<Quran />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
