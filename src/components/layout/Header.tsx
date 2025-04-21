@@ -27,7 +27,7 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <Link
             to="/quran"
-            className={`font-ibm-plex-arabic px-4 py-2 rounded transition bg-khair-accent/30 hover:bg-khair-accent/60 text-black font-bold text-lg
+            className={`font-ibm-plex-arabic px-4 py-2 rounded transition bg-gradient-to-r from-khair-accent/30 to-khair-accent/50 hover:from-khair-accent/40 hover:to-khair-accent/70 text-black font-bold text-lg
               ${location.pathname.startsWith("/quran") ? "border-b-2 border-khair-accent" : ""}
             `}
             style={{

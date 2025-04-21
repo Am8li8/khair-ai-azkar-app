@@ -1,49 +1,21 @@
 
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const quranSurahs = [
-  {
-    id: 1,
-    name: "الفاتحة",
-    content: `
-    بِسْمِ اللّٰهِ الرَّحْمَٰنِ الرَّحِيمِ
-    ١. الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ
-    ٢. الرَّحْمَٰنِ الرَّحِيمِ
-    ٣. مَالِكِ يَوْمِ الدِّينِ
-    ٤. إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ
-    ٥. اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ
-    ٦. صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ
-    `
-  },
-  {
-    id: 2,
-    name: "البقرة",
-    content: `
-    الم
-    ١. ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ
-    ٢. الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ
-    ٣. وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنزِلَ إِلَيْكَ وَمَا أُنزِلَ مِن قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ
-    ٤. أُو۟لَئِكَ عَلَىٰ هُدًۭى مِّن رَّبِّهِمْ وَأُو۟لَئِكَ هُمُ ٱلْمُفْلِحُونَ
-    `
-  },
-  {
-    id: 3,
-    name: "الكوثر",
-    content: `
-    بِسْمِ اللّٰهِ الرَّحْمَٰنِ الرَّحِيمِ
-    ١. إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ
-    ٢. فَصَلِّ لِرَبِّكَ وَانْحَرْ
-    ٣. إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ
-    `
-  }
-];
+// Import the simplified Quran data
+import { quranSurahs } from "@/data/quran";
 
 const Quran: React.FC = () => {
   const { t } = useLanguage();
   const [selectedSurah, setSelectedSurah] = useState<number>(1);
-
+  
+  // Get the currently selected surah
+  const currentSurah = quranSurahs.find(s => s.id === selectedSurah);
+  
   return (
     <div className="khair-container">
       <h1 className="text-3xl font-bold mb-6 text-center font-ibm-plex-arabic">{t("القرآن الكريم")}</h1>
@@ -53,46 +25,63 @@ const Quran: React.FC = () => {
             <CardHeader>
               <CardTitle className="font-ibm-plex-arabic">{t("السور")}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {quranSurahs.map((surah) => (
-                  <li key={surah.id}>
-                    <button
-                      className={`w-full text-right px-3 py-2 rounded font-ibm-plex-arabic hover:bg-khair-accent/20 transition ${
-                        selectedSurah === surah.id ? "bg-khair-accent/40 text-black" : ""
-                      }`}
-                      onClick={() => setSelectedSurah(surah.id)}
-                    >
-                      {surah.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[70vh] pr-4">
+                <ul className="p-4 space-y-1">
+                  {quranSurahs.map((surah) => (
+                    <li key={surah.id}>
+                      <button
+                        className={`w-full text-right px-3 py-2 rounded font-ibm-plex-arabic hover:bg-khair-accent/20 transition ${
+                          selectedSurah === surah.id ? "bg-khair-accent/40 text-black" : ""
+                        }`}
+                        onClick={() => setSelectedSurah(surah.id)}
+                      >
+                        {surah.id}. {surah.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
             </CardContent>
           </Card>
         </aside>
         <main className="flex-1 min-w-0">
           <Card>
             <CardHeader>
-              <CardTitle className="font-ibm-plex-arabic text-xl">{quranSurahs.find(s => s.id === selectedSurah)?.name}</CardTitle>
+              <CardTitle className="font-ibm-plex-arabic text-xl">
+                {currentSurah?.id}. {currentSurah?.name}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div
-                className="text-2xl text-center leading-loose font-ibm-plex-arabic"
+                className="text-2xl leading-loose font-ibm-plex-arabic"
                 dir="rtl"
                 style={{
                   fontFamily: "'Amiri', 'IBM Plex Sans Arabic', serif"
                 }}
               >
-                {(quranSurahs.find(s => s.id === selectedSurah)?.content || "").trim()}
+                {currentSurah?.verses?.map((verse, index) => (
+                  <HoverCard key={index} openDelay={300} closeDelay={200}>
+                    <HoverCardTrigger asChild>
+                      <span className="cursor-help hover:bg-khair-accent/20 p-1 rounded transition-colors inline-block mb-2">
+                        {verse.text} <span className="inline-block mr-1 text-sm">﴿{verse.number}﴾</span>
+                      </span>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80 font-ibm-plex-arabic text-right p-4" dir="rtl">
+                      <h4 className="font-bold mb-2">تفسير الآية {verse.number}:</h4>
+                      <p className="text-sm">{verse.tafsir || "لا يوجد تفسير متاح لهذه الآية."}</p>
+                    </HoverCardContent>
+                  </HoverCard>
+                ))}
               </div>
             </CardContent>
           </Card>
         </main>
       </div>
-      <div className="text-sm text-gray-400 mt-10 text-center font-ibm-plex-arabic">
-        حقوق الخط © مجمع الملك فهد لطباعة المصحف الشريف. <br />
-        هذا مجرد عرض تجريبي لبعض السور ويمكنك إضافة المزيد من السور لاحقًا.
+      <div className="text-sm text-center mt-6">
+        <p className="font-ibm-plex-arabic text-gray-500">
+          بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+        </p>
       </div>
     </div>
   );
