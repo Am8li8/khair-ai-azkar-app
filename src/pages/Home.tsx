@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,12 +26,41 @@ interface TasbihState {
   }>;
 }
 
+const allAhadith = [
+  {
+    id: 1,
+    text: "إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى.",
+    source: "رواه البخاري ومسلم"
+  },
+  {
+    id: 2,
+    text: "الدين النصيحة.",
+    source: "رواه مسلم"
+  },
+  {
+    id: 3,
+    text: "لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه.",
+    source: "رواه البخاري ومسلم"
+  },
+  {
+    id: 4,
+    text: "من لا يشكر الناس لا يشكر الله.",
+    source: "رواه أحمد"
+  },
+];
+
+interface FavoriteItem {
+  type: "zikr" | "hadith";
+  id: number;
+  text: string;
+  source?: string;
+}
+
 const Home: React.FC = () => {
   const { t } = useLanguage();
   const [completedZikrs, setCompletedZikrs] = useState<Record<string, Set<number>>>({});
   const [activeTab, setActiveTab] = useState<string>('morning');
   
-  // عرض الوقت بتوقيت القاهرة
   const [currentTime, setCurrentTime] = useState<string>(
     new Date().toLocaleTimeString('ar-EG', {
       timeZone: 'Africa/Cairo',
@@ -42,7 +70,6 @@ const Home: React.FC = () => {
     })
   );
   
-  // حالة السبحة
   const [tasbihState, setTasbihState] = useState<TasbihState>({
     selectedZikr: 'subhanAllah',
     customZikr: '',
@@ -53,6 +80,18 @@ const Home: React.FC = () => {
     history: [],
   });
   
+  const [randomHadith, setRandomHadith] = useState(() => {
+    const initial = allAhadith[Math.floor(Math.random() * allAhadith.length)];
+    return initial;
+  });
+
+  const [favorites, setFavorites] = useState<FavoriteItem[]>(() => {
+    const favRaw = localStorage.getItem("khair-favorites");
+    return favRaw ? JSON.parse(favRaw) : [];
+  });
+  const [customFavInput, setCustomFavInput] = useState("");
+  const [customFavType, setCustomFavType] = useState<"zikr" | "hadith">("zikr");
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(
@@ -68,17 +107,14 @@ const Home: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
   
-  // استعادة حالة السبحة من التخزين المحلي عند تحميل الصفحة
   useEffect(() => {
     const savedState = localStorage.getItem('khair-tasbih-state');
     if (savedState) {
       setTasbihState(JSON.parse(savedState));
     }
     
-    // استعادة الأذكار المكتملة
     const savedCompletedZikrs = localStorage.getItem('khair-completed-zikrs');
     if (savedCompletedZikrs) {
-      // تحويل الكائن المخزن إلى كائن مع مجموعات Set
       const parsedCompletedZikrs = JSON.parse(savedCompletedZikrs);
       const reconvertedCompletedZikrs: Record<string, Set<number>> = {};
       
@@ -90,14 +126,11 @@ const Home: React.FC = () => {
     }
   }, []);
   
-  // حفظ حالة السبحة في التخزين المحلي كلما تغيرت
   useEffect(() => {
     localStorage.setItem('khair-tasbih-state', JSON.stringify(tasbihState));
   }, [tasbihState]);
   
-  // حفظ الأذكار المكتملة في التخزين المحلي
   useEffect(() => {
-    // تحويل كائن مع مجموعات Set إلى كائن قابل للتخزين في localStorage
     const serializableCompletedZikrs: Record<string, number[]> = {};
     
     for (const categoryId in completedZikrs) {
@@ -107,7 +140,21 @@ const Home: React.FC = () => {
     localStorage.setItem('khair-completed-zikrs', JSON.stringify(serializableCompletedZikrs));
   }, [completedZikrs]);
   
-  // التعامل مع النقر على الذكر
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)]);
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  useEffect(() => {
+    setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)]);
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem("khair-favorites", JSON.stringify(favorites));
+  }, [favorites]);
+  
   const handleZikrClick = (categoryId: string, zikrId: number, maxCount: number) => {
     setCompletedZikrs(prev => {
       const categoryZikrs = prev[categoryId] || new Set<number>();
@@ -138,12 +185,10 @@ const Home: React.FC = () => {
     });
   };
 
-  // التعامل مع النقر على "عرض"
   const handleViewCategory = (categoryId: string) => {
     setActiveTab(categoryId);
   };
   
-  // وظائف السبحة
   const handleZikrSelect = (value: string) => {
     const selected = defaultTasbihOptions.find(option => option.id === value);
     setTasbihState(prev => ({
@@ -188,7 +233,6 @@ const Home: React.FC = () => {
   
   const incrementCount = () => {
     if (tasbihState.completedRounds >= tasbihState.rounds) {
-      // تم الانتهاء من جميع الجولات، لا يمكن التقدم أكثر
       toast({
         title: 'اكتملت السبحة',
         description: 'لقد أكملت جميع الجولات، يمكنك إعادة التعيين للبدء من جديد',
@@ -200,26 +244,22 @@ const Home: React.FC = () => {
     setTasbihState(prev => {
       const newCount = prev.currentCount + 1;
       
-      // عرض رسالة تأكيد بعدد المرات
       toast({
         title: `تم التكرار ${newCount} مرة`,
         duration: 1000,
       });
       
-      // إذا وصلنا للعدد المستهدف
       if (newCount >= prev.targetCount) {
         const newCompletedRounds = prev.completedRounds + 1;
         const currentDate = new Date().toISOString();
         const currentZikr = prev.selectedZikr === 'custom' ? prev.customZikr : getCurrentZikrText();
         
-        // إضافة إلى سجل الأذكار
         const newHistory = [...(prev.history || []), {
           zikr: currentZikr,
           count: prev.targetCount,
           date: currentDate
         }];
         
-        // إذا أكملنا جميع الجولات
         if (newCompletedRounds >= prev.rounds) {
           toast({
             title: 'مبارك!',
@@ -276,7 +316,6 @@ const Home: React.FC = () => {
     return (tasbihState.currentCount / tasbihState.targetCount) * 100;
   };
   
-  // إعادة ضبط جميع الأذكار المكتملة
   const resetAllCompletedZikrs = () => {
     setCompletedZikrs({});
     toast({
@@ -286,6 +325,39 @@ const Home: React.FC = () => {
     });
   };
   
+  const addToFavorites = (item: FavoriteItem) => {
+    setFavorites(prev => {
+      if (prev.some(f => f.type === item.type && f.id === item.id && f.text === item.text)) return prev;
+      toast({
+        title: "تمت الإضافة إلى المفضلة",
+        description: item.type === "hadith" ? "تم حفظ الحديث في المفضلة" : "تم حفظ الذكر في المفضلة"
+      });
+      return [...prev, item];
+    });
+  };
+
+  const removeFromFavorites = (index: number) => {
+    setFavorites(prev => {
+      const arr = [...prev];
+      arr.splice(index, 1);
+      return arr;
+    });
+    toast({title: "تم الحذف", description: "تم حذف العنصر من المفضلة"});
+  };
+
+  const handleCustomFavAdd = () => {
+    if (!customFavInput.trim()) return;
+    setFavorites(prev => [
+      ...prev,
+      {
+        type: customFavType,
+        id: Date.now(),
+        text: customFavInput.trim()
+      }
+    ]);
+    setCustomFavInput("");
+  };
+
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -298,17 +370,46 @@ const Home: React.FC = () => {
         </div>
       </div>
       
+      <div className="bg-soft-purple/60 rounded-lg shadow mb-5 p-4 text-center">
+        <div className="text-xl font-bold font-ibm-plex-arabic mb-2">حديث نبوي</div>
+        <div className="font-ibm-plex-arabic text-lg mb-1">
+          "{randomHadith.text}"
+        </div>
+        <div className="text-muted-foreground text-sm">{randomHadith.source}</div>
+        <Button
+          variant="ghost"
+          className="mt-2"
+          onClick={() => setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)])}
+        >
+          تحديث الحديث الآن
+        </Button>
+        <Button
+          variant="secondary"
+          className="mt-2 ml-2"
+          onClick={() =>
+            addToFavorites({
+              type: "hadith",
+              id: randomHadith.id,
+              text: randomHadith.text,
+              source: randomHadith.source,
+            })
+          }
+        >
+          أضف للمفضلة
+        </Button>
+      </div>
+      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8 overflow-x-auto">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-8 overflow-x-auto">
           {allAzkarCategories.slice(0, 5).map(category => (
             <TabsTrigger key={category.id} value={category.id}>
               {category.title}
             </TabsTrigger>
           ))}
           <TabsTrigger value="tasbih">{t('tasbih')}</TabsTrigger>
-          <TabsTrigger value="more">
-            {t('more')}
-          </TabsTrigger>
+          <TabsTrigger value="hadiths">الأحاديث</TabsTrigger>
+          <TabsTrigger value="favorites">المفضلة</TabsTrigger>
+          <TabsTrigger value="more">{t('more')}</TabsTrigger>
         </TabsList>
         
         {allAzkarCategories.map(category => (
@@ -367,7 +468,6 @@ const Home: React.FC = () => {
           </TabsContent>
         ))}
         
-        {/* تاب السبحة */}
         <TabsContent value="tasbih" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="overflow-hidden">
@@ -498,35 +598,90 @@ const Home: React.FC = () => {
             </div>
           </div>
               
-          {/* سجل التسبيحات */}
-          {tasbihState.history && tasbihState.history.length > 0 && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="font-ibm-plex-arabic">
-                  {t('tasbihHistory')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {tasbihState.history.slice(-5).reverse().map((entry, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 border-b">
-                      <div className="flex-1">
-                        <span className="font-medium font-ibm-plex-arabic">{entry.zikr}</span>
-                      </div>
+          <TabsContent value="hadiths" className="mt-0">
+            <div className="space-y-5">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">أحاديث نبوية</h2>
+              </div>
+              {allAhadith.map(hadith => (
+                <Card key={hadith.id} className="mb-4 relative">
+                  <CardHeader className="pb-2">
+                    <div className="font-ibm-plex-arabic text-lg">{hadith.text}</div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-muted-foreground text-sm">{hadith.source}</div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        addToFavorites({
+                          type: "hadith",
+                          id: hadith.id,
+                          text: hadith.text,
+                          source: hadith.source,
+                        })
+                      }
+                    >
+                      أضف للمفضلة
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="favorites" className="mt-0">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-3">المفضلة لديك</h2>
+              <div className="flex gap-2 mb-4">
+                <select
+                  className="border rounded px-3 py-1"
+                  value={customFavType}
+                  onChange={e => setCustomFavType(e.target.value as "zikr" | "hadith")}
+                >
+                  <option value="zikr">ذكر مخصص</option>
+                  <option value="hadith">حديث مخصص</option>
+                </select>
+                <input
+                  type="text"
+                  value={customFavInput}
+                  onChange={e => setCustomFavInput(e.target.value)}
+                  className="border rounded px-3 py-1 flex-1"
+                  placeholder="أضف ذكر/حديث مخصص"
+                />
+                <Button variant="default" onClick={handleCustomFavAdd}>
+                  أضف
+                </Button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {favorites.length === 0 && (
+                  <div>لم تقم بحفظ أي أذكار أو أحاديث بعد.</div>
+                )}
+                {favorites.map((item, idx) => (
+                  <Card key={item.id + "_" + idx} className="relative font-ibm-plex-arabic">
+                    <CardHeader>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="font-ibm-plex-arabic">
-                          {`${entry.count} مرة`}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(entry.date).toLocaleString('ar-EG')}
-                        </span>
+                        <span className="font-bold">{item.type === "hadith" ? "حديث" : "ذكر"}</span>
+                        <Button size="icon" className="ml-auto" variant="ghost" onClick={() => removeFromFavorites(idx)}>
+                          ×
+                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    </CardHeader>
+                    <CardContent>
+                      <div>{item.text}</div>
+                    </CardContent>
+                    {item.source && (
+                      <CardFooter>
+                        <div className="text-muted-foreground text-xs">{item.source}</div>
+                      </CardFooter>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
         </TabsContent>
         
         <TabsContent value="more" className="mt-0">
