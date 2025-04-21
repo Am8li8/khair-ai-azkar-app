@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,10 +8,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
 import { defaultTasbihOptions } from '@/data/azkar';
 import { toast } from '@/components/ui/use-toast';
-import { BookOpen, Check, RotateCcw } from 'lucide-react';
+import { BookOpen, Check, RotateCcw, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { HadithDisplay, FavoriteItem } from '@/components/HadithDisplay';
+import FavoritesSection from '@/components/FavoritesSection';
+import HadithsSection from '@/components/HadithsSection';
 
 interface TasbihState {
   selectedZikr: string;
@@ -24,36 +28,6 @@ interface TasbihState {
     count: number;
     date: string;
   }>;
-}
-
-const allAhadith = [
-  {
-    id: 1,
-    text: "إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى.",
-    source: "رواه البخاري ومسلم"
-  },
-  {
-    id: 2,
-    text: "الدين النصيحة.",
-    source: "رواه مسلم"
-  },
-  {
-    id: 3,
-    text: "لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه.",
-    source: "رواه البخاري ومسلم"
-  },
-  {
-    id: 4,
-    text: "من لا يشكر الناس لا يشكر الله.",
-    source: "رواه أحمد"
-  },
-];
-
-interface FavoriteItem {
-  type: "zikr" | "hadith";
-  id: number;
-  text: string;
-  source?: string;
 }
 
 const Home: React.FC = () => {
@@ -80,17 +54,10 @@ const Home: React.FC = () => {
     history: [],
   });
   
-  const [randomHadith, setRandomHadith] = useState(() => {
-    const initial = allAhadith[Math.floor(Math.random() * allAhadith.length)];
-    return initial;
-  });
-
   const [favorites, setFavorites] = useState<FavoriteItem[]>(() => {
     const favRaw = localStorage.getItem("khair-favorites");
     return favRaw ? JSON.parse(favRaw) : [];
   });
-  const [customFavInput, setCustomFavInput] = useState("");
-  const [customFavType, setCustomFavType] = useState<"zikr" | "hadith">("zikr");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -141,17 +108,6 @@ const Home: React.FC = () => {
   }, [completedZikrs]);
   
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)]);
-    }, 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  useEffect(() => {
-    setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)]);
-  }, []);
-  
-  useEffect(() => {
     localStorage.setItem("khair-favorites", JSON.stringify(favorites));
   }, [favorites]);
   
@@ -189,6 +145,7 @@ const Home: React.FC = () => {
     setActiveTab(categoryId);
   };
   
+  // Tasbih related functions
   const handleZikrSelect = (value: string) => {
     const selected = defaultTasbihOptions.find(option => option.id === value);
     setTasbihState(prev => ({
@@ -325,9 +282,17 @@ const Home: React.FC = () => {
     });
   };
   
+  // Favorites related functions
   const addToFavorites = (item: FavoriteItem) => {
     setFavorites(prev => {
-      if (prev.some(f => f.type === item.type && f.id === item.id && f.text === item.text)) return prev;
+      if (prev.some(f => f.type === item.type && f.id === item.id && f.text === item.text)) {
+        toast({
+          title: "موجود بالفعل في المفضلة",
+          description: "هذا العنصر موجود بالفعل في المفضلة"
+        });
+        return prev;
+      }
+      
       toast({
         title: "تمت الإضافة إلى المفضلة",
         description: item.type === "hadith" ? "تم حفظ الحديث في المفضلة" : "تم حفظ الذكر في المفضلة"
@@ -340,22 +305,35 @@ const Home: React.FC = () => {
     setFavorites(prev => {
       const arr = [...prev];
       arr.splice(index, 1);
+      toast({
+        title: "تم الحذف", 
+        description: "تم حذف العنصر من المفضلة"
+      });
       return arr;
     });
-    toast({title: "تم الحذف", description: "تم حذف العنصر من المفضلة"});
   };
 
-  const handleCustomFavAdd = () => {
-    if (!customFavInput.trim()) return;
+  const addCustomFavorite = (type: "zikr" | "hadith", text: string) => {
     setFavorites(prev => [
       ...prev,
       {
-        type: customFavType,
+        type: type,
         id: Date.now(),
-        text: customFavInput.trim()
+        text: text
       }
     ]);
-    setCustomFavInput("");
+    toast({
+      title: "تمت الإضافة",
+      description: `تم إضافة ${type === "zikr" ? "الذكر" : "الحديث"} إلى المفضلة`
+    });
+  };
+
+  // Check if a zikr is in favorites
+  const isZikrInFavorites = (categoryId: string, zikrId: number, text: string) => {
+    return favorites.some(item => 
+      item.type === "zikr" && 
+      (item.id === zikrId || item.text === text)
+    );
   };
 
   return (
@@ -370,38 +348,11 @@ const Home: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-soft-purple/60 rounded-lg shadow mb-5 p-4 text-center">
-        <div className="text-xl font-bold font-ibm-plex-arabic mb-2">حديث نبوي</div>
-        <div className="font-ibm-plex-arabic text-lg mb-1">
-          "{randomHadith.text}"
-        </div>
-        <div className="text-muted-foreground text-sm">{randomHadith.source}</div>
-        <Button
-          variant="ghost"
-          className="mt-2"
-          onClick={() => setRandomHadith(allAhadith[Math.floor(Math.random() * allAhadith.length)])}
-        >
-          تحديث الحديث الآن
-        </Button>
-        <Button
-          variant="secondary"
-          className="mt-2 ml-2"
-          onClick={() =>
-            addToFavorites({
-              type: "hadith",
-              id: randomHadith.id,
-              text: randomHadith.text,
-              source: randomHadith.source,
-            })
-          }
-        >
-          أضف للمفضلة
-        </Button>
-      </div>
+      <HadithDisplay favorites={favorites} onAddToFavorites={addToFavorites} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-8 overflow-x-auto">
-          {allAzkarCategories.slice(0, 5).map(category => (
+        <TabsList className="grid grid-cols-4 md:grid-cols-6 mb-8 overflow-x-auto">
+          {allAzkarCategories.slice(0, 4).map(category => (
             <TabsTrigger key={category.id} value={category.id}>
               {category.title}
             </TabsTrigger>
@@ -429,12 +380,12 @@ const Home: React.FC = () => {
               
               {category.azkar.map((zikr) => {
                 const isCompleted = completedZikrs[category.id]?.has(zikr.id);
+                const isFavorite = isZikrInFavorites(category.id, zikr.id, zikr.text);
                 
                 return (
                   <Card 
                     key={zikr.id} 
                     className={`prayer-card overflow-hidden ${isCompleted ? 'border-khair-accent bg-opacity-10' : ''}`}
-                    onClick={() => !isCompleted && handleZikrClick(category.id, zikr.id, zikr.count)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
@@ -442,16 +393,38 @@ const Home: React.FC = () => {
                           <span className="material-icons text-sm">repeat</span>
                           {`${t('repeat')}: ${zikr.count}`}
                         </Badge>
-                        {isCompleted && (
-                          <Badge variant="secondary" className="bg-khair-accent text-black flex items-center gap-1">
-                            <Check size={14} />
-                            {t('done')}
-                          </Badge>
-                        )}
+                        <div className="flex gap-2">
+                          {isCompleted && (
+                            <Badge variant="secondary" className="bg-khair-accent text-black flex items-center gap-1">
+                              <Check size={14} />
+                              {t('done')}
+                            </Badge>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="flex h-7 p-0 items-center gap-1"
+                            onClick={() => addToFavorites({
+                              type: "zikr",
+                              id: zikr.id,
+                              text: zikr.text,
+                              source: zikr.source
+                            })}
+                          >
+                            {isFavorite ? (
+                              <BookmarkCheck className="h-4 w-4 text-khair-accent" />
+                            ) : (
+                              <Bookmark className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pb-3">
-                      <div className="whitespace-pre-line text-lg font-ibm-plex-arabic">
+                      <div 
+                        className="whitespace-pre-line text-lg font-ibm-plex-arabic"
+                        onClick={() => !isCompleted && handleZikrClick(category.id, zikr.id, zikr.count)}
+                      >
                         {zikr.text}
                       </div>
                     </CardContent>
@@ -597,96 +570,23 @@ const Home: React.FC = () => {
               )}
             </div>
           </div>
+        </TabsContent>
               
-          <TabsContent value="hadiths" className="mt-0">
-            <div className="space-y-5">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">أحاديث نبوية</h2>
-              </div>
-              {allAhadith.map(hadith => (
-                <Card key={hadith.id} className="mb-4 relative">
-                  <CardHeader className="pb-2">
-                    <div className="font-ibm-plex-arabic text-lg">{hadith.text}</div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-muted-foreground text-sm">{hadith.source}</div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        addToFavorites({
-                          type: "hadith",
-                          id: hadith.id,
-                          text: hadith.text,
-                          source: hadith.source,
-                        })
-                      }
-                    >
-                      أضف للمفضلة
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+        <TabsContent value="hadiths" className="mt-0">
+          <HadithsSection favorites={favorites} onAddToFavorites={addToFavorites} />
+        </TabsContent>
 
-          <TabsContent value="favorites" className="mt-0">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-3">المفضلة لديك</h2>
-              <div className="flex gap-2 mb-4">
-                <select
-                  className="border rounded px-3 py-1"
-                  value={customFavType}
-                  onChange={e => setCustomFavType(e.target.value as "zikr" | "hadith")}
-                >
-                  <option value="zikr">ذكر مخصص</option>
-                  <option value="hadith">حديث مخصص</option>
-                </select>
-                <input
-                  type="text"
-                  value={customFavInput}
-                  onChange={e => setCustomFavInput(e.target.value)}
-                  className="border rounded px-3 py-1 flex-1"
-                  placeholder="أضف ذكر/حديث مخصص"
-                />
-                <Button variant="default" onClick={handleCustomFavAdd}>
-                  أضف
-                </Button>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                {favorites.length === 0 && (
-                  <div>لم تقم بحفظ أي أذكار أو أحاديث بعد.</div>
-                )}
-                {favorites.map((item, idx) => (
-                  <Card key={item.id + "_" + idx} className="relative font-ibm-plex-arabic">
-                    <CardHeader>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">{item.type === "hadith" ? "حديث" : "ذكر"}</span>
-                        <Button size="icon" className="ml-auto" variant="ghost" onClick={() => removeFromFavorites(idx)}>
-                          ×
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div>{item.text}</div>
-                    </CardContent>
-                    {item.source && (
-                      <CardFooter>
-                        <div className="text-muted-foreground text-xs">{item.source}</div>
-                      </CardFooter>
-                    )}
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
+        <TabsContent value="favorites" className="mt-0">
+          <FavoritesSection 
+            favorites={favorites} 
+            onRemoveFromFavorites={removeFromFavorites}
+            onAddCustomFavorite={addCustomFavorite}
+          />
         </TabsContent>
         
         <TabsContent value="more" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allAzkarCategories.slice(5).map(category => (
+            {allAzkarCategories.slice(4).map(category => (
               <Card key={category.id} className="cursor-pointer hover:border-khair-accent transition-colors">
                 <CardHeader>
                   <CardTitle>{category.title}</CardTitle>

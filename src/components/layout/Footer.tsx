@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -44,7 +43,7 @@ const Footer: React.FC = () => {
           <img 
             src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
             alt={t('appName')} 
-            className="h-20 w-auto" // Increased from h-16 to h-20
+            className="h-24 w-auto"
           />
           <p className="text-center text-muted-foreground text-sm mr-2">
             &copy; {new Date().getFullYear()}
