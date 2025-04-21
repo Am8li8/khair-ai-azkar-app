@@ -27,6 +27,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/quran" element={<Quran />} />
+                  <Route path="/mushaf" element={<(await import('./pages/Mushaf')).default} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
