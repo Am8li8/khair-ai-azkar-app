@@ -1,3 +1,5 @@
+
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +12,9 @@ import Footer from "@/components/layout/Footer";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/NotFound";
 import Quran from "@/pages/Quran";
+
+// Lazy load the Mushaf component
+const Mushaf = lazy(() => import("./pages/Mushaf"));
 
 const queryClient = new QueryClient();
 
@@ -27,7 +32,14 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/quran" element={<Quran />} />
-                  <Route path="/mushaf" element={<(await import('./pages/Mushaf')).default} />
+                  <Route 
+                    path="/mushaf" 
+                    element={
+                      <Suspense fallback={<div className="flex justify-center items-center h-full p-8">تحميل المصحف...</div>}>
+                        <Mushaf />
+                      </Suspense>
+                    } 
+                  />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
