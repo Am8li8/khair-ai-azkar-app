@@ -3,14 +3,22 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { quranSurahs } from "@/data/quran";
+import { quranSurahs, surahNames } from "@/data/quran";
+import { BookOpen, Check, Plus } from "lucide-react";
 
 const Quran: React.FC = () => {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [selectedSurah, setSelectedSurah] = useState<number>(1);
+  const [dhikrCount, setDhikrCount] = useState<number>(0);
+  const [targetCount, setTargetCount] = useState<number>(33);
+  const [completedRounds, setCompletedRounds] = useState<number>(0);
   
-  // Add Uthmani font when component mounts
+  // Load Uthmani font
   useEffect(() => {
     const id = "uthmaniFont";
     if (!document.getElementById(id)) {
@@ -28,9 +36,71 @@ const Quran: React.FC = () => {
 
   const currentSurah = quranSurahs.find(s => s.id === selectedSurah);
   
+  const incrementDhikr = () => {
+    setDhikrCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= targetCount) {
+        setCompletedRounds(r => r + 1);
+        toast({
+          title: "أحسنت!",
+          description: "أكملت دورة من الذكر"
+        });
+        return 0;
+      }
+      return newCount;
+    });
+  };
+
+  const resetDhikr = () => {
+    setDhikrCount(0);
+    setCompletedRounds(0);
+    toast({
+      title: "تم إعادة التعيين",
+      description: "تم إعادة تعيين عداد الذكر"
+    });
+  };
+
   return (
     <div className="khair-container">
       <h1 className="text-3xl font-bold mb-6 text-center font-ibm-plex-arabic">{t("القرآن الكريم")}</h1>
+      
+      {/* Dhikr Counter */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center justify-center">
+            <div 
+              className="tasbih-counter cursor-pointer" 
+              onClick={incrementDhikr}
+            >
+              <div className="counter-text">{dhikrCount}</div>
+              <div className="counter-label font-ibm-plex-arabic">
+                عدد مرات التكرار
+              </div>
+              <div className="text-sm mt-2">
+                {completedRounds} دورات مكتملة
+              </div>
+              
+              <div className="mt-4 w-4/5 bg-white/30 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-white h-full rounded-full transition-all duration-300" 
+                  style={{ width: `${(dhikrCount / targetCount) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={resetDhikr} 
+              className="mt-4"
+            >
+              إعادة التعيين
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Quran Content */}
       <div className="flex flex-col md:flex-row gap-6">
         <aside className="md:w-1/4 w-full">
           <Card>
@@ -40,15 +110,15 @@ const Quran: React.FC = () => {
             <CardContent className="p-0">
               <ScrollArea className="h-[70vh] pr-4">
                 <ul className="p-4 space-y-1">
-                  {quranSurahs.map((surah) => (
-                    <li key={surah.id}>
+                  {surahNames.map((name, index) => (
+                    <li key={index + 1}>
                       <button
                         className={`w-full text-right px-3 py-2 rounded font-ibm-plex-arabic hover:bg-khair-accent/20 transition ${
-                          selectedSurah === surah.id ? "bg-khair-accent/40 text-black" : ""
+                          selectedSurah === index + 1 ? "bg-khair-accent/40 text-black" : ""
                         }`}
-                        onClick={() => setSelectedSurah(surah.id)}
+                        onClick={() => setSelectedSurah(index + 1)}
                       >
-                        {surah.id}. {surah.name}
+                        {index + 1}. {name}
                       </button>
                     </li>
                   ))}
@@ -57,6 +127,7 @@ const Quran: React.FC = () => {
             </CardContent>
           </Card>
         </aside>
+        
         <main className="flex-1 min-w-0">
           <Card>
             <CardHeader>
@@ -88,6 +159,7 @@ const Quran: React.FC = () => {
           </Card>
         </main>
       </div>
+      
       <style>{`
         @font-face {
           font-family: 'KFGQPC Uthmanic Script HAFS';

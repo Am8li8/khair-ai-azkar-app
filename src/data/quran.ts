@@ -1,6 +1,4 @@
-// This is a simplified version of the Quran data
-// Each surah contains its verses with text and a simple tafsir
-
+// This file contains the Quran data structure
 interface Verse {
   number: number;
   text: string;
@@ -13,6 +11,7 @@ interface Surah {
   verses: Verse[];
 }
 
+// Start with a basic set of surahs - you would typically load this from an API
 export const quranSurahs: Surah[] = [
   {
     id: 1,
@@ -62,7 +61,7 @@ export const quranSurahs: Surah[] = [
       {
         number: 1,
         text: "الم",
-        tafsir: "حروف مقطعة، استأثر الله بعلمها، وقيل هي من المتشابه الذي لا يعلمه إلا الله."
+        tafsir: "حروف مقطعة، استأثر الله بعلمها."
       },
       {
         number: 2,
@@ -222,29 +221,18 @@ export const quranSurahs: Surah[] = [
   }
 ];
 
-// Add remaining surahs (11-113) here with similar structure
-// Note: To keep file size reasonable, we're showing surahs 1-10 and 114
-// In a production app, you would load these from an API or database
-
-// Fill in dummy data for missing surahs
-for (let i = 11; i <= 113; i++) {
-  quranSurahs.push({
-    id: i,
-    name: `سورة ${i}`,
-    verses: [
-      {
-        number: 1,
-        text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-        tafsir: "بدء السورة باسم الله تعالى"
-      },
-      {
-        number: 2,
-        text: `هذه الآية الثانية من السورة رقم ${i}`,
-        tafsir: `تفسير الآية الثانية من السورة رقم ${i}`
-      }
-    ]
-  });
-}
-
-// Sort surahs by ID to ensure correct order
-quranSurahs.sort((a, b) => a.id - b.id);
+// Add the complete list of surah names with their correct numbers
+export const surahNames = [
+  "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
+  "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
+  "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
+  "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
+  "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
+  "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
+  "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
+  "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
+  "التكوير", "الانفطار", "المطففين", "الانشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
+  "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
+  "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر",
+  "المسد", "الإخلاص", "الفلق", "الناس"
+];
