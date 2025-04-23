@@ -1,19 +1,31 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-// Import the simplified Quran data
 import { quranSurahs } from "@/data/quran";
 
 const Quran: React.FC = () => {
   const { t } = useLanguage();
   const [selectedSurah, setSelectedSurah] = useState<number>(1);
   
-  // Get the currently selected surah
+  // Add Uthmani font when component mounts
+  useEffect(() => {
+    const id = "uthmaniFont";
+    if (!document.getElementById(id)) {
+      const link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href = "https://drive.google.com/uc?export=download&id=1qAEZf0YdX8GCHpwJMgwipYpQBnfuzXst";
+      document.head.appendChild(link);
+    }
+    return () => {
+      const link = document.getElementById(id);
+      if (link) link.remove();
+    };
+  }, []);
+
   const currentSurah = quranSurahs.find(s => s.id === selectedSurah);
   
   return (
@@ -54,22 +66,20 @@ const Quran: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div
-                className="text-2xl leading-loose font-ibm-plex-arabic"
+                className="text-3xl leading-loose quran-uthmani-text select-text"
                 dir="rtl"
-                style={{
-                  fontFamily: "'Amiri', 'IBM Plex Sans Arabic', serif"
-                }}
               >
                 {currentSurah?.verses?.map((verse, index) => (
-                  <HoverCard key={index} openDelay={300} closeDelay={200}>
+                  <HoverCard key={index} openDelay={200} closeDelay={150}>
                     <HoverCardTrigger asChild>
-                      <span className="cursor-help hover:bg-khair-accent/20 p-1 rounded transition-colors inline-block mb-2">
-                        {verse.text} <span className="inline-block mr-1 text-sm">﴿{verse.number}﴾</span>
+                      <span className="cursor-help hover:bg-khair-accent/20 px-1 rounded transition-colors inline-block mb-4">
+                        {verse.text}
+                        <span className="inline-block mr-2 text-lg align-super select-none">﴿{verse.number}﴾</span>
                       </span>
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-80 font-ibm-plex-arabic text-right p-4" dir="rtl">
+                    <HoverCardContent className="w-96 font-ibm-plex-arabic text-right p-4" dir="rtl">
                       <h4 className="font-bold mb-2">تفسير الآية {verse.number}:</h4>
-                      <p className="text-sm">{verse.tafsir || "لا يوجد تفسير متاح لهذه الآية."}</p>
+                      <p className="text-base">{verse.tafsir || "لا يوجد تفسير متاح."}</p>
                     </HoverCardContent>
                   </HoverCard>
                 ))}
@@ -78,11 +88,18 @@ const Quran: React.FC = () => {
           </Card>
         </main>
       </div>
-      <div className="text-sm text-center mt-6">
-        <p className="font-ibm-plex-arabic text-gray-500">
-          بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-        </p>
-      </div>
+      <style>{`
+        @font-face {
+          font-family: 'KFGQPC Uthmanic Script HAFS';
+          src: url('https://drive.google.com/uc?export=download&id=1qAEZf0YdX8GCHpwJMgwipYpQBnfuzXst') format('truetype');
+          font-display: swap;
+        }
+        .quran-uthmani-text {
+          font-family: 'KFGQPC Uthmanic Script HAFS', 'IBM Plex Sans Arabic', serif;
+          letter-spacing: 0.02em;
+          line-height: 2.3;
+        }
+      `}</style>
     </div>
   );
 };
