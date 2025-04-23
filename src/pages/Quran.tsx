@@ -26,8 +26,6 @@ const Quran: React.FC = () => {
     };
   }, []);
 
-  const currentSurah = quranSurahs.find(s => s.id === selectedSurah);
-
   return (
     <div className="khair-container">
       <h1 className="text-3xl font-bold mb-6 text-center font-ibm-plex-arabic">{t("القرآن الكريم")}</h1>
@@ -64,7 +62,7 @@ const Quran: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="font-ibm-plex-arabic text-xl">
-                {currentSurah?.id}. {currentSurah?.name}
+                {selectedSurah}. {surahNames[selectedSurah - 1]}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -72,7 +70,7 @@ const Quran: React.FC = () => {
                 className="text-3xl leading-loose quran-uthmani-text select-text"
                 dir="rtl"
               >
-                {currentSurah?.verses?.map((verse, index) => (
+                {quranSurahs.find(s => s.id === selectedSurah)?.verses.map((verse, index) => (
                   <HoverCard key={index} openDelay={200} closeDelay={150}>
                     <HoverCardTrigger asChild>
                       <span className="cursor-help hover:bg-khair-accent/20 px-1 rounded transition-colors inline-block mb-4">
@@ -109,4 +107,3 @@ const Quran: React.FC = () => {
 };
 
 export default Quran;
-
