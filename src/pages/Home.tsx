@@ -1,20 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
-import { defaultTasbihOptions } from '@/data/azkar';
-import { toast } from '@/components/ui/use-toast';
-import { BookOpen, Check, RotateCcw, Bookmark, BookmarkCheck } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { HadithDisplay, FavoriteItem } from '@/components/HadithDisplay';
-import FavoritesSection from '@/components/FavoritesSection';
-import HadithsSection from '@/components/HadithsSection';
+import DhikrCounter from '@/components/DhikrCounter';
 
 interface TasbihState {
   selectedZikr: string;
@@ -145,7 +133,6 @@ const Home: React.FC = () => {
     setActiveTab(categoryId);
   };
   
-  // Tasbih related functions
   const handleZikrSelect = (value: string) => {
     const selected = defaultTasbihOptions.find(option => option.id === value);
     setTasbihState(prev => ({
@@ -282,7 +269,6 @@ const Home: React.FC = () => {
     });
   };
   
-  // Favorites related functions
   const addToFavorites = (item: FavoriteItem) => {
     setFavorites(prev => {
       if (prev.some(f => f.type === item.type && f.id === item.id && f.text === item.text)) {
@@ -328,7 +314,6 @@ const Home: React.FC = () => {
     });
   };
 
-  // Check if a zikr is in favorites
   const isZikrInFavorites = (categoryId: string, zikrId: number, text: string) => {
     return favorites.some(item => 
       item.type === "zikr" && 
@@ -348,7 +333,7 @@ const Home: React.FC = () => {
         </div>
       </div>
       
-      <HadithDisplay favorites={favorites} onAddToFavorites={addToFavorites} />
+      <DhikrCounter title="سبحان الله" target={33} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 md:grid-cols-6 mb-8 overflow-x-auto">
