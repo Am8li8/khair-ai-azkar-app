@@ -25,17 +25,6 @@ const Header: React.FC = () => {
           </Link>
         </div>
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <Link
-            to="/quran"
-            className={`font-ibm-plex-arabic px-4 py-2 rounded transition bg-gradient-to-r from-khair-accent/30 to-khair-accent/50 hover:from-khair-accent/40 hover:to-khair-accent/70 text-black font-bold text-lg
-              ${location.pathname === "/quran" ? "border-b-2 border-khair-accent" : ""}
-            `}
-            style={{
-              textShadow: "0 1px 2px rgba(0,0,0,0.08)"
-            }}
-          >
-            القرآن الكريم
-          </Link>
           {location.pathname !== '/' && (
             <Button
               variant="default"
