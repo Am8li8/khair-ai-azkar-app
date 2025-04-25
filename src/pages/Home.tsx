@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
+import DhikrCounter from '@/components/DhikrCounter';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { BookOpen, Check, Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
-import { FavoriteItem, HadithDisplay, allAhadith } from '@/components/HadithDisplay';
+import { HadithDisplay, allAhadith } from '@/components/HadithDisplay';
 
-// Define FavoriteItem interface
+// Define FavoriteItem interface (this specific type is only used in Home.tsx)
 interface FavoriteItem {
   type: "zikr" | "hadith";
   id: number;
@@ -492,6 +493,8 @@ const Home: React.FC = () => {
           <span dir="ltr" className="mr-2">{currentTime}</span>
         </div>
       </div>
+      
+      <DhikrCounter title="سبحان الله" target={33} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 md:grid-cols-6 mb-8 overflow-x-auto">
