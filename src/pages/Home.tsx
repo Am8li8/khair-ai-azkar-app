@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
-import DhikrCounter from '@/components/DhikrCounter';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,15 @@ import { toast } from '@/components/ui/use-toast';
 import { BookOpen, Check, Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
 import { FavoriteItem, HadithDisplay, allAhadith } from '@/components/HadithDisplay';
 
+// Define FavoriteItem interface
+interface FavoriteItem {
+  type: "zikr" | "hadith";
+  id: number;
+  text: string;
+  source?: string;
+}
+
+// Define the default tasbih options
 const defaultTasbihOptions = [
   { id: 'subhanAllah', text: 'سبحان الله', count: 33 },
   { id: 'alhamdulillah', text: 'الحمد لله', count: 33 },
@@ -484,8 +492,6 @@ const Home: React.FC = () => {
           <span dir="ltr" className="mr-2">{currentTime}</span>
         </div>
       </div>
-      
-      <DhikrCounter title="سبحان الله" target={33} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 md:grid-cols-6 mb-8 overflow-x-auto">
