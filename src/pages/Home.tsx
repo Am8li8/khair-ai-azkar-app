@@ -3,6 +3,158 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
 import DhikrCounter from '@/components/DhikrCounter';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/use-toast';
+import { BookOpen, Check, Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
+import { FavoriteItem, HadithDisplay, allAhadith } from '@/components/HadithDisplay';
+
+const defaultTasbihOptions = [
+  { id: 'subhanAllah', text: 'سبحان الله', count: 33 },
+  { id: 'alhamdulillah', text: 'الحمد لله', count: 33 },
+  { id: 'allahuAkbar', text: 'الله أكبر', count: 34 },
+  { id: 'lailahaillallah', text: 'لا إله إلا الله', count: 100 },
+  { id: 'astaghfirullah', text: 'أستغفر الله', count: 100 }
+];
+
+const HadithsSection = ({ favorites, onAddToFavorites }: { 
+  favorites: FavoriteItem[]; 
+  onAddToFavorites: (item: FavoriteItem) => void;
+}) => {
+  const isInFavorites = (hadith: { id: number }) => {
+    return favorites.some(item => item.type === "hadith" && item.id === hadith.id);
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">أحاديث نبوية</h2>
+      </div>
+      {allAhadith.map(hadith => (
+        <Card key={hadith.id} className="mb-4 relative">
+          <CardHeader className="pb-2">
+            <div className="font-ibm-plex-arabic text-lg">{hadith.text}</div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-muted-foreground text-sm">{hadith.source}</div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant={isInFavorites(hadith) ? "secondary" : "outline"}
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() =>
+                onAddToFavorites({
+                  type: "hadith",
+                  id: hadith.id,
+                  text: hadith.text,
+                  source: hadith.source,
+                })
+              }
+            >
+              {isInFavorites(hadith) ? (
+                <>
+                  <BookmarkCheck className="h-4 w-4" /> 
+                  تمت الإضافة للمفضلة
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" /> 
+                  أضف للمفضلة
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const FavoritesSection = ({ 
+  favorites, 
+  onRemoveFromFavorites,
+  onAddCustomFavorite
+}: { 
+  favorites: FavoriteItem[];
+  onRemoveFromFavorites: (index: number) => void;
+  onAddCustomFavorite: (type: "zikr" | "hadith", text: string) => void;
+}) => {
+  const [customFavInput, setCustomFavInput] = useState("");
+  const [customFavType, setCustomFavType] = useState<"zikr" | "hadith">("zikr");
+
+  const handleCustomFavAdd = () => {
+    if (!customFavInput.trim()) return;
+    onAddCustomFavorite(customFavType, customFavInput.trim());
+    setCustomFavInput("");
+  };
+
+  return (
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold mb-3">المفضلة لديك</h2>
+      <div className="flex gap-2 mb-4">
+        <Select
+          value={customFavType}
+          onValueChange={(value) => setCustomFavType(value as "zikr" | "hadith")}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="نوع الإضافة" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="zikr">ذكر مخصص</SelectItem>
+            <SelectItem value="hadith">حديث مخصص</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          value={customFavInput}
+          onChange={e => setCustomFavInput(e.target.value)}
+          className="font-ibm-plex-arabic flex-1"
+          placeholder="أضف ذكر/حديث مخصص"
+        />
+        <Button variant="default" onClick={handleCustomFavAdd}>
+          أضف
+        </Button>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        {favorites.length === 0 && (
+          <div className="text-center p-4 border rounded">لم تقم بحفظ أي أذكار أو أحاديث بعد.</div>
+        )}
+        {favorites.map((item, idx) => (
+          <Card key={`${item.id}_${idx}`} className="relative font-ibm-plex-arabic">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-khair-primary">
+                  {item.type === "hadith" ? "حديث" : "ذكر"}
+                </span>
+                <Button 
+                  size="icon" 
+                  className="ml-auto" 
+                  variant="ghost" 
+                  onClick={() => onRemoveFromFavorites(idx)}
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div>{item.text}</div>
+            </CardContent>
+            {item.source && (
+              <CardFooter>
+                <div className="text-muted-foreground text-xs">{item.source}</div>
+              </CardFooter>
+            )}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 interface TasbihState {
   selectedZikr: string;
