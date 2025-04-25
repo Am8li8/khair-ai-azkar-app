@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
-import DhikrCounter from '@/components/DhikrCounter';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -261,19 +260,13 @@ const Home: React.FC = () => {
   }, [favorites]);
   
   const handleZikrClick = (categoryId: string, zikrId: number, maxCount: number) => {
+    // Increment the counter for this specific zikr by one
     setCompletedZikrs(prev => {
       const categoryZikrs = prev[categoryId] || new Set<number>();
-      const newCategoryZikrs = new Set(categoryZikrs);
       
-      if (!newCategoryZikrs.has(zikrId)) {
-        newCategoryZikrs.add(zikrId);
-        
-        toast({
-          title: 'تم تسجيل الذكر',
-          description: `تم تسجيل هذا الذكر بنجاح`,
-          duration: 3000,
-        });
-      } else {
+      // If zikr already exists in completed set, remove it (toggle functionality)
+      if (categoryZikrs.has(zikrId)) {
+        const newCategoryZikrs = new Set(categoryZikrs);
         newCategoryZikrs.delete(zikrId);
         
         toast({
@@ -281,7 +274,22 @@ const Home: React.FC = () => {
           description: `تم إلغاء تسجيل هذا الذكر`,
           duration: 3000,
         });
+        
+        return {
+          ...prev,
+          [categoryId]: newCategoryZikrs
+        };
       }
+      
+      // Mark as completed if not already
+      const newCategoryZikrs = new Set(categoryZikrs);
+      newCategoryZikrs.add(zikrId);
+      
+      toast({
+        title: 'تم تسجيل الذكر',
+        description: `تم تسجيل هذا الذكر بنجاح`,
+        duration: 3000,
+      });
       
       return {
         ...prev,
@@ -493,8 +501,6 @@ const Home: React.FC = () => {
           <span dir="ltr" className="mr-2">{currentTime}</span>
         </div>
       </div>
-      
-      <DhikrCounter title="سبحان الله" target={33} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 md:grid-cols-6 mb-8 overflow-x-auto">
