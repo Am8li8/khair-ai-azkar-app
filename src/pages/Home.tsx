@@ -12,7 +12,6 @@ import { toast } from '@/hooks/use-toast';
 import { BookOpen, Check, Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
 import { HadithDisplay, allAhadith } from '@/components/HadithDisplay';
 
-// Define FavoriteItem interface (this specific type is only used in Home.tsx)
 interface FavoriteItem {
   type: "zikr" | "hadith";
   id: number;
@@ -20,7 +19,6 @@ interface FavoriteItem {
   source?: string;
 }
 
-// Define the default tasbih options
 const defaultTasbihOptions = [
   { id: 'subhanAllah', text: 'سبحان الله', count: 33 },
   { id: 'alhamdulillah', text: 'الحمد لله', count: 33 },
@@ -260,11 +258,9 @@ const Home: React.FC = () => {
   }, [favorites]);
   
   const handleZikrClick = (categoryId: string, zikrId: number, maxCount: number) => {
-    // Increment the counter for this specific zikr by one
     setCompletedZikrs(prev => {
       const categoryZikrs = prev[categoryId] || new Set<number>();
       
-      // If zikr already exists in completed set, remove it (toggle functionality)
       if (categoryZikrs.has(zikrId)) {
         const newCategoryZikrs = new Set(categoryZikrs);
         newCategoryZikrs.delete(zikrId);
@@ -281,7 +277,6 @@ const Home: React.FC = () => {
         };
       }
       
-      // Mark as completed if not already
       const newCategoryZikrs = new Set(categoryZikrs);
       newCategoryZikrs.add(zikrId);
       
@@ -574,8 +569,8 @@ const Home: React.FC = () => {
                     </CardHeader>
                     <CardContent className="pb-3">
                       <div 
-                        className="whitespace-pre-line text-lg font-ibm-plex-arabic"
-                        onClick={() => !isCompleted && handleZikrClick(category.id, zikr.id, zikr.count)}
+                        className="whitespace-pre-line text-lg font-ibm-plex-arabic cursor-pointer"
+                        onClick={() => handleZikrClick(category.id, zikr.id, zikr.count)}
                       >
                         {zikr.text}
                       </div>
