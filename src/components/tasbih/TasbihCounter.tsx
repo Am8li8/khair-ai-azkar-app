@@ -26,15 +26,19 @@ const TasbihCounter: React.FC<TasbihCounterProps> = ({
   return (
     <div className="flex flex-col items-center justify-center">
       <div 
-        className={`tasbih-counter ${isCompleted ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`} 
-        onClick={onIncrement}
+        className={`tasbih-counter ${isCompleted ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg'}`} 
+        onClick={isCompleted ? undefined : onIncrement}
+        style={{
+          background: 'linear-gradient(135deg, #267c7f, #164e51)',
+          transition: 'all 0.3s ease'
+        }}
       >
         <div className="counter-text">{currentCount}</div>
         <div className="counter-label font-ibm-plex-arabic">
           {zikrText}
         </div>
         <div className="text-sm mt-2 font-ibm-plex-arabic">
-          {`${completedRounds} / ${rounds} جولات`}
+          {`${completedRounds} / ${rounds} ${t('rounds')}`}
         </div>
       </div>
       
@@ -56,7 +60,7 @@ const TasbihCounter: React.FC<TasbihCounterProps> = ({
         <div className="mt-4 text-center">
           <Button variant="default" className="bg-khair-accent text-black hover:bg-khair-accent/90 font-ibm-plex-arabic">
             <Check className="mr-2 h-4 w-4" />
-            {'مبارك! تم إكمال جميع الجولات'}
+            {t('congratulations')}! {t('completedAllRounds')}
           </Button>
         </div>
       )}
