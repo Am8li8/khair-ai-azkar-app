@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RotateCcw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
 
 interface DhikrCounterProps {
   title?: string;
@@ -40,10 +39,6 @@ const DhikrCounter: React.FC<DhikrCounterProps> = ({ title = 'الذكر', targe
       duration: 1500,
     });
   };
-  
-  const getProgressPercentage = () => {
-    return (count / target) * 100;
-  };
 
   return (
     <Card className="w-full max-w-md mx-auto mb-6">
@@ -62,12 +57,6 @@ const DhikrCounter: React.FC<DhikrCounterProps> = ({ title = 'الذكر', targe
             <div className="text-sm mt-2 font-ibm-plex-arabic">
               {`${count} / ${target}`}
             </div>
-            
-            <Progress 
-              value={getProgressPercentage()} 
-              className="h-2 w-4/5 mt-4 bg-white/30"
-              aria-label="Counter progress"
-            />
           </div>
           
           <Button 
