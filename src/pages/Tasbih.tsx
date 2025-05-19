@@ -1,15 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { defaultTasbihOptions } from '@/data/azkar';
 import { toast } from '@/components/ui/use-toast';
-import { RotateCcw, Check, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
+import TasbihSettings from '@/components/tasbih/TasbihSettings';
+import TasbihCounter from '@/components/tasbih/TasbihCounter';
+import TasbihHistory from '@/components/tasbih/TasbihHistory';
+import { defaultTasbihOptions } from '@/data/azkar';
 
 interface TasbihState {
   selectedZikr: string;
@@ -199,10 +196,6 @@ const Tasbih: React.FC = () => {
     return selected ? selected.text : '';
   };
   
-  const getProgressPercentage = () => {
-    return (tasbihState.currentCount / tasbihState.targetCount) * 100;
-  };
-  
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -216,150 +209,29 @@ const Tasbih: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle className="font-ibm-plex-arabic">{t('chooseZikr')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="zikr-select" className="font-ibm-plex-arabic">{t('chooseZikr')}</Label>
-              <Select 
-                value={tasbihState.selectedZikr} 
-                onValueChange={handleZikrSelect}
-              >
-                <SelectTrigger id="zikr-select">
-                  <SelectValue placeholder={t('chooseZikr')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {defaultTasbihOptions.map(option => (
-                    <SelectItem key={option.id} value={option.id} className="font-ibm-plex-arabic">
-                      {option.text} ({option.count})
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom" className="font-ibm-plex-arabic">{t('customZikr')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {tasbihState.selectedZikr === 'custom' && (
-              <div className="space-y-2">
-                <Label htmlFor="custom-zikr" className="font-ibm-plex-arabic">{t('customZikr')}</Label>
-                <Input
-                  id="custom-zikr"
-                  value={tasbihState.customZikr}
-                  onChange={handleCustomZikrChange}
-                  placeholder="أدخل الذكر المخصص"
-                  className="font-ibm-plex-arabic"
-                />
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="target-count" className="font-ibm-plex-arabic">{t('target')}</Label>
-              <Input
-                id="target-count"
-                type="number"
-                value={tasbihState.targetCount}
-                onChange={handleTargetCountChange}
-                min={1}
-                max={1000}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="rounds" className="font-ibm-plex-arabic">{t('totalRounds')}</Label>
-              <Input
-                id="rounds"
-                type="number"
-                value={tasbihState.rounds}
-                onChange={handleRoundsChange}
-                min={1}
-                max={100}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full font-ibm-plex-arabic" onClick={resetTasbih}>
-              <RotateCcw className="mr-2 h-4 w-4" />
-              {t('reset')}
-            </Button>
-          </CardFooter>
-        </Card>
+        <TasbihSettings 
+          selectedZikr={tasbihState.selectedZikr}
+          customZikr={tasbihState.customZikr}
+          targetCount={tasbihState.targetCount}
+          rounds={tasbihState.rounds}
+          onZikrSelect={handleZikrSelect}
+          onCustomZikrChange={handleCustomZikrChange}
+          onTargetCountChange={handleTargetCountChange}
+          onRoundsChange={handleRoundsChange}
+          onReset={resetTasbih}
+        />
         
-        <div className="flex flex-col items-center justify-center">
-          <div 
-            className={`tasbih-counter ${tasbihState.completedRounds >= tasbihState.rounds ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`} 
-            onClick={incrementCount}
-          >
-            <div className="counter-text">{tasbihState.currentCount}</div>
-            <div className="counter-label font-ibm-plex-arabic">
-              {getCurrentZikrText()}
-            </div>
-            <div className="text-sm mt-2 font-ibm-plex-arabic">
-              {`${tasbihState.completedRounds} / ${tasbihState.rounds} جولات`}
-            </div>
-            
-            <div className="mt-4 w-4/5 bg-white/30 rounded-full h-2 overflow-hidden">
-              <div 
-                className="bg-white h-full rounded-full transition-all duration-300" 
-                style={{ width: `${getProgressPercentage()}%` }}
-              ></div>
-            </div>
-          </div>
-          
-          <div className="flex justify-center mt-4 space-x-4 rtl:space-x-reverse">
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground font-ibm-plex-arabic">{t('completed')}</div>
-              <div className="text-2xl font-bold">{tasbihState.completedRounds}</div>
-            </div>
-            
-            <div className="border-r mx-2"></div>
-            
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground font-ibm-plex-arabic">{t('target')}</div>
-              <div className="text-2xl font-bold">{tasbihState.rounds}</div>
-            </div>
-          </div>
-          
-          {tasbihState.completedRounds >= tasbihState.rounds && (
-            <div className="mt-4 text-center">
-              <Button variant="default" className="bg-khair-accent text-black hover:bg-khair-accent/90 font-ibm-plex-arabic">
-                <Check className="mr-2 h-4 w-4" />
-                {'مبارك! تم إكمال جميع الجولات'}
-              </Button>
-            </div>
-          )}
-        </div>
+        <TasbihCounter 
+          currentCount={tasbihState.currentCount}
+          completedRounds={tasbihState.completedRounds}
+          rounds={tasbihState.rounds}
+          zikrText={getCurrentZikrText()}
+          isCompleted={tasbihState.completedRounds >= tasbihState.rounds}
+          onIncrement={incrementCount}
+        />
       </div>
       
-      {tasbihState.history && tasbihState.history.length > 0 && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="font-ibm-plex-arabic">
-              {'سجل التسبيحات'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {tasbihState.history.slice(-5).reverse().map((entry, index) => (
-                <div key={index} className="flex justify-between items-center p-2 border-b">
-                  <div className="flex-1">
-                    <span className="font-medium font-ibm-plex-arabic">{entry.zikr}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Badge variant="outline" className="font-ibm-plex-arabic">
-                      {`${entry.count} مرة`}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(entry.date).toLocaleString('ar-EG')}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <TasbihHistory history={tasbihState.history} />
     </div>
   );
 };
