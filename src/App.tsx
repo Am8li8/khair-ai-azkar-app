@@ -7,8 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import BottomNavBar from "@/components/layout/BottomNavBar";
 import Home from "@/pages/Home";
+import Azkar from "@/pages/Azkar";
+import Favorites from "@/pages/Favorites";
+import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,13 +26,16 @@ const App = () => (
           <BrowserRouter>
             <div className="flex flex-col min-h-screen">
               <Header />
-              <main className="flex-1">
+              <main className="flex-1 pb-16">
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/azkar" element={<Azkar />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
-              <Footer />
+              <BottomNavBar />
             </div>
           </BrowserRouter>
         </TooltipProvider>
