@@ -32,11 +32,11 @@ const Azkar: React.FC = () => {
               {category.azkar.map((zikr, index) => (
                 <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow">
                   <CardHeader className="bg-muted/30 pb-2">
-                    <CardTitle className="text-lg font-ibm-plex-arabic">{zikr.title}</CardTitle>
+                    <CardTitle className="text-lg font-ibm-plex-arabic">{zikr.text.split('\n')[0]}</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
                     <p className="line-clamp-3 text-muted-foreground font-ibm-plex-arabic">
-                      {zikr.content}
+                      {zikr.text}
                     </p>
                     <div className="mt-2 text-sm text-muted-foreground">
                       <span className="bg-khair-secondary/20 px-2 py-1 rounded-full">

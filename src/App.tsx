@@ -10,6 +10,7 @@ import Header from "@/components/layout/Header";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 import Home from "@/pages/Home";
 import Azkar from "@/pages/Azkar";
+import ZikrDetail from "@/pages/ZikrDetail";
 import Favorites from "@/pages/Favorites";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/azkar" element={<Azkar />} />
+                  <Route path="/azkar/:categoryId/:zikrIndex" element={<ZikrDetail />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
