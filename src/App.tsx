@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Header from "@/components/layout/Header";
-import BottomNavBar from "@/components/layout/BottomNavBar";
 import Home from "@/pages/Home";
 import Azkar from "@/pages/Azkar";
 import ZikrDetail from "@/pages/ZikrDetail";
@@ -37,7 +36,6 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
-              <BottomNavBar />
             </div>
           </BrowserRouter>
         </TooltipProvider>
