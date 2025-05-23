@@ -4,14 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { BookOpen, Check, Bookmark, BookmarkCheck, RotateCcw } from 'lucide-react';
-import { HadithDisplay, allAhadith } from '@/components/HadithDisplay';
+import { BookOpen, Check, Bookmark, BookmarkCheck } from 'lucide-react';
 import HadithsSection from '@/components/HadithsSection';
 import FavoritesSection from '@/components/FavoritesSection';
 
@@ -74,7 +70,7 @@ const Home: React.FC = () => {
     localStorage.setItem("khair-favorites", JSON.stringify(favorites));
   }, [favorites]);
   
-  const handleZikrClick = (categoryId: string, zikrId: number, maxCount: number) => {
+  const handleZikrClick = (categoryId: string, zikrId: number) => {
     setCompletedZikrs(prev => {
       const categoryZikrs = prev[categoryId] || new Set<number>();
       
@@ -175,9 +171,6 @@ const Home: React.FC = () => {
     );
   };
 
-  // Get a random hadith for the homepage
-  const randomHadith = allAhadith[Math.floor(Math.random() * allAhadith.length)];
-
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -191,16 +184,11 @@ const Home: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 md:grid-cols-5 mb-8 overflow-x-auto">
+        <TabsList className="grid grid-cols-4 mb-6 overflow-x-auto">
           <TabsTrigger value="home">الرئيسية</TabsTrigger>
-          {allAzkarCategories.slice(0, 3).map(category => (
-            <TabsTrigger key={category.id} value={category.id}>
-              {category.title}
-            </TabsTrigger>
-          ))}
+          <TabsTrigger value="morning">أذكار الصباح</TabsTrigger>
           <TabsTrigger value="hadiths">الأحاديث</TabsTrigger>
           <TabsTrigger value="favorites">المفضلة</TabsTrigger>
-          <TabsTrigger value="more">{t('more')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="home" className="mt-0">
@@ -210,93 +198,10 @@ const Home: React.FC = () => {
               <p className="text-xl mb-4 font-ibm-plex-arabic">أهلاً بك في تطبيق خير للأذكار والأدعية</p>
             </div>
             
-            {/* Featured Azkar Section */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">أذكار مختارة</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {allAzkarCategories.slice(0, 2).map(category => (
-                  category.azkar.slice(0, 2).map(zikr => (
-                    <Card 
-                      key={`${category.id}_${zikr.id}`} 
-                      className="prayer-card overflow-hidden"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <Badge variant="outline" className="mb-2 flex items-center gap-1">
-                            {category.title} - {`${zikr.count} مرات`}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pb-3">
-                        <div className="whitespace-pre-line text-lg font-ibm-plex-arabic cursor-pointer">
-                          {zikr.text}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="pt-3 text-xs text-muted-foreground border-t flex items-start">
-                        <BookOpen size={14} className="ml-2 mt-0.5 flex-shrink-0" />
-                        <p className="whitespace-pre-line">
-                          {zikr.source}
-                        </p>
-                      </CardFooter>
-                    </Card>
-                  ))
-                ))}
-              </div>
-              <div className="flex justify-center mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab('morning')}
-                  className="font-ibm-plex-arabic"
-                >
-                  عرض المزيد من الأذكار
-                </Button>
-              </div>
-            </div>
-            
-            {/* Hadith of the Day */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">حديث اليوم</h2>
-              <Card className="relative font-ibm-plex-arabic">
-                <CardHeader>
-                  <div className="font-ibm-plex-arabic text-lg">{randomHadith.text}</div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-muted-foreground text-sm">{randomHadith.source}</div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    onClick={() =>
-                      addToFavorites({
-                        type: "hadith",
-                        id: randomHadith.id,
-                        text: randomHadith.text,
-                        source: randomHadith.source,
-                      })
-                    }
-                  >
-                    <Bookmark className="h-4 w-4" /> 
-                    أضف للمفضلة
-                  </Button>
-                </CardFooter>
-              </Card>
-              <div className="flex justify-center mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab('hadiths')}
-                  className="font-ibm-plex-arabic"
-                >
-                  عرض المزيد من الأحاديث
-                </Button>
-              </div>
-            </div>
-            
             {/* Categories Preview */}
             <div>
               <h2 className="text-2xl font-bold mb-4">تصفح الأقسام</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {allAzkarCategories.slice(0, 8).map(category => (
                   <Card 
                     key={category.id} 
@@ -376,7 +281,7 @@ const Home: React.FC = () => {
                     <CardContent className="pb-3">
                       <div 
                         className="whitespace-pre-line text-lg font-ibm-plex-arabic cursor-pointer"
-                        onClick={() => handleZikrClick(category.id, zikr.id, zikr.count)}
+                        onClick={() => handleZikrClick(category.id, zikr.id)}
                       >
                         {zikr.text}
                       </div>
@@ -404,31 +309,6 @@ const Home: React.FC = () => {
             onRemoveFromFavorites={removeFromFavorites}
             onAddCustomFavorite={addCustomFavorite}
           />
-        </TabsContent>
-        
-        <TabsContent value="more" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allAzkarCategories.slice(4).map(category => (
-              <Card key={category.id} className="cursor-pointer hover:border-khair-accent transition-colors">
-                <CardHeader>
-                  <CardTitle>{category.title}</CardTitle>
-                  <CardDescription>
-                    {`${t('numberOfAzkar')}: ${category.azkar.length}`}
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button 
-                    variant="default" 
-                    className="w-full"
-                    onClick={() => handleViewCategory(category.id)}
-                  >
-                    <span className="material-icons mr-2">visibility</span>
-                    {t('view')}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
     </div>
