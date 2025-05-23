@@ -4,11 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, MessageCircleHelp } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
+  
+  const handleSupportClick = () => {
+    window.open('https://t.me/Am8li8', '_blank');
+  };
   
   return (
     <div className="container py-6">
@@ -35,6 +39,25 @@ const Settings: React.FC = () => {
                 {theme === 'light' ? t('darkMode') : t('lightMode')}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-ibm-plex-arabic">الدعم الفني</CardTitle>
+            <CardDescription className="font-ibm-plex-arabic">
+              تواصل معنا للمساعدة
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              variant="default" 
+              className="w-full font-ibm-plex-arabic flex items-center gap-2 justify-center"
+              onClick={handleSupportClick}
+            >
+              <MessageCircleHelp size={18} />
+              تواصل مع الدعم الفني
+            </Button>
           </CardContent>
         </Card>
         
