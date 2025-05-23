@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { BookOpen, Check, Bookmark, BookmarkCheck } from 'lucide-react';
 import HadithsSection from '@/components/HadithsSection';
-import FavoritesSection from '@/components/FavoritesSection';
 
 interface FavoriteItem {
   type: "zikr" | "hadith";
@@ -137,33 +136,6 @@ const Home: React.FC = () => {
     });
   };
 
-  const removeFromFavorites = (index: number) => {
-    setFavorites(prev => {
-      const arr = [...prev];
-      arr.splice(index, 1);
-      toast({
-        title: "تم الحذف", 
-        description: "تم حذف العنصر من المفضلة"
-      });
-      return arr;
-    });
-  };
-
-  const addCustomFavorite = (type: "zikr" | "hadith", text: string) => {
-    setFavorites(prev => [
-      ...prev,
-      {
-        type: type,
-        id: Date.now(),
-        text: text
-      }
-    ]);
-    toast({
-      title: "تمت الإضافة",
-      description: `تم إضافة ${type === "zikr" ? "الذكر" : "الحديث"} إلى المفضلة`
-    });
-  };
-
   const isZikrInFavorites = (categoryId: string, zikrId: number, text: string) => {
     return favorites.some(item => 
       item.type === "zikr" && 
@@ -184,11 +156,10 @@ const Home: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6 overflow-x-auto">
+        <TabsList className="grid grid-cols-3 mb-6 overflow-x-auto">
           <TabsTrigger value="home">الرئيسية</TabsTrigger>
           <TabsTrigger value="morning">أذكار الصباح</TabsTrigger>
           <TabsTrigger value="hadiths">الأحاديث</TabsTrigger>
-          <TabsTrigger value="favorites">المفضلة</TabsTrigger>
         </TabsList>
         
         <TabsContent value="home" className="mt-0">
@@ -301,14 +272,6 @@ const Home: React.FC = () => {
         
         <TabsContent value="hadiths" className="mt-0">
           <HadithsSection favorites={favorites} onAddToFavorites={addToFavorites} />
-        </TabsContent>
-
-        <TabsContent value="favorites" className="mt-0">
-          <FavoritesSection 
-            favorites={favorites} 
-            onRemoveFromFavorites={removeFromFavorites}
-            onAddCustomFavorite={addCustomFavorite}
-          />
         </TabsContent>
       </Tabs>
     </div>
