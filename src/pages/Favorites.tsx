@@ -3,10 +3,25 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useNavigate } from 'react-router-dom';
+
+interface FavoriteItem {
+  type: "zikr" | "hadith";
+  id: number;
+  text: string;
+  source?: string;
+}
 
 const Favorites: React.FC = () => {
-  // This would be replaced with real data from localStorage or context
-  const [favorites, setFavorites] = React.useState<any[]>([]);
+  const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>("khair-favorites", []);
+  const navigate = useNavigate();
+
+  const handleRemoveFavorite = (index: number) => {
+    const newFavorites = [...favorites];
+    newFavorites.splice(index, 1);
+    setFavorites(newFavorites);
+  };
 
   return (
     <div className="container py-6">
@@ -18,21 +33,29 @@ const Favorites: React.FC = () => {
           <p className="text-muted-foreground mb-4 font-ibm-plex-arabic">
             يمكنك إضافة الأذكار والأحاديث إلى المفضلة لتظهر هنا
           </p>
-          <Button variant="outline" className="font-ibm-plex-arabic">
+          <Button variant="outline" className="font-ibm-plex-arabic" onClick={() => navigate('/azkar')}>
             استعرض الأذكار
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           {favorites.map((item, idx) => (
             <Card key={idx} className="font-ibm-plex-arabic">
-              <CardHeader>
-                <div className="text-sm text-muted-foreground">
+              <CardHeader className="flex flex-row justify-between items-center">
+                <div className="text-sm text-khair-primary font-bold">
                   {item.type === 'zikr' ? 'ذكر' : 'حديث'}
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0" 
+                  onClick={() => handleRemoveFavorite(idx)}
+                >
+                  ×
+                </Button>
               </CardHeader>
               <CardContent>
-                <p>{item.text}</p>
+                <p className="whitespace-pre-wrap">{item.text}</p>
               </CardContent>
               {item.source && (
                 <CardFooter className="text-xs text-muted-foreground flex items-start">

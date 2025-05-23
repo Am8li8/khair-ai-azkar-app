@@ -4,11 +4,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { allAzkarCategories } from '@/data/azkar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, Bookmark, BookmarkCheck } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+
+interface FavoriteItem {
+  type: "zikr" | "hadith";
+  id: number;
+  text: string;
+  source?: string;
+}
 
 const ZikrDetail: React.FC = () => {
   const { categoryId, zikrIndex } = useParams<{ categoryId: string; zikrIndex: string }>();
   const navigate = useNavigate();
+  
+  const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>("khair-favorites", []);
   
   const category = allAzkarCategories.find(cat => cat.id === categoryId);
   const zikrIdx = zikrIndex ? parseInt(zikrIndex, 10) : 0;
@@ -25,6 +36,37 @@ const ZikrDetail: React.FC = () => {
     );
   }
   
+  const isInFavorites = favorites.some(
+    item => item.type === "zikr" && item.text === zikr.text
+  );
+  
+  const handleToggleFavorite = () => {
+    if (isInFavorites) {
+      const newFavorites = favorites.filter(
+        item => !(item.type === "zikr" && item.text === zikr.text)
+      );
+      setFavorites(newFavorites);
+      toast({
+        title: "تم الحذف من المفضلة",
+        description: "تم حذف الذكر من المفضلة"
+      });
+    } else {
+      setFavorites([
+        ...favorites,
+        {
+          type: "zikr",
+          id: zikr.id || zikrIdx,
+          text: zikr.text,
+          source: zikr.source
+        }
+      ]);
+      toast({
+        title: "تمت الإضافة إلى المفضلة",
+        description: "تم حفظ الذكر في المفضلة"
+      });
+    }
+  };
+  
   return (
     <div className="container py-6">
       <Button 
@@ -38,7 +80,21 @@ const ZikrDetail: React.FC = () => {
       
       <Card className="max-w-3xl mx-auto">
         <CardHeader className="bg-muted/30 pb-3">
-          <CardTitle className="text-xl font-ibm-plex-arabic">{zikr.text.split('\n')[0]}</CardTitle>
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-xl font-ibm-plex-arabic">{zikr.text.split('\n')[0]}</CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex h-7 p-0 items-center gap-1"
+              onClick={handleToggleFavorite}
+            >
+              {isInFavorites ? (
+                <BookmarkCheck className="h-5 w-5 text-khair-accent" />
+              ) : (
+                <Bookmark className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="whitespace-pre-wrap text-lg font-ibm-plex-arabic leading-relaxed">
