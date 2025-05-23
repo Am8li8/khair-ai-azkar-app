@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Moon, Sun, MessageCircleHelp } from 'lucide-react';
+import { Moon, Sun, MessageCircle } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -55,7 +55,7 @@ const Settings: React.FC = () => {
               className="w-full font-ibm-plex-arabic flex items-center gap-2 justify-center"
               onClick={handleSupportClick}
             >
-              <MessageCircleHelp size={18} />
+              <MessageCircle size={18} />
               تواصل مع الدعم الفني
             </Button>
           </CardContent>
