@@ -12,6 +12,7 @@ import Azkar from "@/pages/Azkar";
 import Settings from "@/pages/Settings";
 import Favorites from "@/pages/Favorites";
 import NotFound from "@/pages/NotFound";
+import ZikrDetail from "@/pages/ZikrDetail";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/azkar" element={<Azkar />} />
+                  <Route path="/azkar/:categoryId/:zikrIndex" element={<ZikrDetail />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />

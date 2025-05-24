@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allAzkarCategories } from '@/data/azkar';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ interface FavoriteItem {
 
 const Home: React.FC = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [completedZikrs, setCompletedZikrs] = useState<Record<string, Set<number>>>({});
   
   const [currentTime, setCurrentTime] = useState<string>(
@@ -136,6 +137,10 @@ const Home: React.FC = () => {
     );
   };
 
+  const handleZikrCardClick = (categoryId: string, zikrIndex: number) => {
+    navigate(`/azkar/${categoryId}/${zikrIndex}`);
+  };
+
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -203,14 +208,15 @@ const Home: React.FC = () => {
           </div>
           
           <div className="space-y-4">
-            {allAzkarCategories[0].azkar.slice(0, 3).map((zikr) => {
+            {allAzkarCategories[0].azkar.slice(0, 3).map((zikr, index) => {
               const isCompleted = completedZikrs[allAzkarCategories[0].id]?.has(zikr.id);
               const isFavorite = isZikrInFavorites(allAzkarCategories[0].id, zikr.id, zikr.text);
               
               return (
                 <Card 
                   key={zikr.id} 
-                  className={`prayer-card overflow-hidden ${isCompleted ? 'border-khair-accent bg-opacity-10' : ''}`}
+                  className={`prayer-card overflow-hidden cursor-pointer ${isCompleted ? 'border-khair-accent bg-opacity-10' : ''}`}
+                  onClick={() => handleZikrCardClick(allAzkarCategories[0].id, index)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
@@ -229,12 +235,15 @@ const Home: React.FC = () => {
                           variant="ghost" 
                           size="sm" 
                           className="flex h-7 p-0 items-center gap-1"
-                          onClick={() => addToFavorites({
-                            type: "zikr",
-                            id: zikr.id,
-                            text: zikr.text,
-                            source: zikr.source
-                          })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToFavorites({
+                              type: "zikr",
+                              id: zikr.id,
+                              text: zikr.text,
+                              source: zikr.source
+                            });
+                          }}
                         >
                           {isFavorite ? (
                             <BookmarkCheck className="h-4 w-4 text-khair-accent" />
@@ -247,8 +256,11 @@ const Home: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pb-3">
                     <div 
-                      className="whitespace-pre-line text-lg font-ibm-plex-arabic cursor-pointer"
-                      onClick={() => handleZikrClick(allAzkarCategories[0].id, zikr.id)}
+                      className="whitespace-pre-line text-lg font-ibm-plex-arabic"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleZikrClick(allAzkarCategories[0].id, zikr.id);
+                      }}
                     >
                       {zikr.text}
                     </div>
