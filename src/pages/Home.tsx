@@ -171,7 +171,7 @@ const Home: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pb-2">
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      {category.description || `مجموعة من ${category.title}`}
+                      مجموعة من {category.title}
                     </p>
                   </CardContent>
                   <CardFooter className="pt-0 flex justify-between">

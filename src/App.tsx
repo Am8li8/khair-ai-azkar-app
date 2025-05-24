@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 import Home from "@/pages/Home";
+import Azkar from "@/pages/Azkar";
 import Settings from "@/pages/Settings";
 import Favorites from "@/pages/Favorites";
 import NotFound from "@/pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
               <main className="flex-1 pb-16">
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/azkar" element={<Azkar />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
