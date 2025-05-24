@@ -141,6 +141,10 @@ const Home: React.FC = () => {
     navigate(`/azkar/${categoryId}/${zikrIndex}`);
   };
 
+  const handleCategoryClick = (categoryId: string) => {
+    navigate('/azkar');
+  };
+
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -170,6 +174,7 @@ const Home: React.FC = () => {
                 <Card 
                   key={category.id} 
                   className="cursor-pointer hover:border-khair-accent transition-colors"
+                  onClick={() => handleCategoryClick(category.id)}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-ibm-plex-arabic">{category.title}</CardTitle>
