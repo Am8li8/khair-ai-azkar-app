@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useForm } from 'react-hook-form';
-import { Moon, Sun, MessageCircle, Save } from 'lucide-react';
+import { Moon, Sun, MessageCircle, Save, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileData {
@@ -25,12 +24,15 @@ const Settings: React.FC = () => {
     email: ''
   });
   
+  const [isEditing, setIsEditing] = React.useState(false);
+  
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileData>({
     defaultValues: profileData
   });
   
   const onSubmit = (data: ProfileData) => {
     setProfileData(data);
+    setIsEditing(false);
     toast({
       title: "تم الحفظ بنجاح",
       description: "تم حفظ معلوماتك الشخصية",
@@ -44,6 +46,9 @@ const Settings: React.FC = () => {
   React.useEffect(() => {
     reset(profileData);
   }, [profileData, reset]);
+
+  const hasProfileData = profileData.name && profileData.email;
+  const showForm = !hasProfileData || isEditing;
   
   return (
     <div className="container py-6">
@@ -54,52 +59,76 @@ const Settings: React.FC = () => {
           <CardHeader>
             <CardTitle className="font-ibm-plex-arabic">المعلومات الشخصية</CardTitle>
             <CardDescription className="font-ibm-plex-arabic">
-              أضف اسمك والبريد الإلكتروني
+              {showForm ? "أضف اسمك والبريد الإلكتروني" : "معلوماتك الشخصية"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="font-ibm-plex-arabic">الاسم</Label>
-                <Input
-                  id="name"
-                  placeholder="أدخل اسمك"
-                  className="font-ibm-plex-arabic"
-                  {...register('name', { required: 'الاسم مطلوب' })}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive font-ibm-plex-arabic">
-                    {errors.name.message}
+            {showForm ? (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="font-ibm-plex-arabic">الاسم</Label>
+                  <Input
+                    id="name"
+                    placeholder="أدخل اسمك"
+                    className="font-ibm-plex-arabic"
+                    {...register('name', { required: 'الاسم مطلوب' })}
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-destructive font-ibm-plex-arabic">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="font-ibm-plex-arabic">البريد الإلكتروني</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    {...register('email', { 
+                      required: 'البريد الإلكتروني مطلوب',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'البريد الإلكتروني غير صحيح'
+                      }
+                    })}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-destructive font-ibm-plex-arabic">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+                
+                <Button type="submit" className="w-full font-ibm-plex-arabic flex items-center gap-2">
+                  <Save size={18} />
+                  حفظ المعلومات
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-center p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-2 font-ibm-plex-arabic">
+                    أهلاً وسهلاً {profileData.name}!
+                  </h3>
+                  <p className="text-muted-foreground font-ibm-plex-arabic">
+                    نرحب بك في تطبيق الأذكار
                   </p>
-                )}
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    <p className="font-ibm-plex-arabic">البريد الإلكتروني: {profileData.email}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full font-ibm-plex-arabic flex items-center gap-2"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Edit size={18} />
+                  تعديل المعلومات
+                </Button>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email" className="font-ibm-plex-arabic">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="example@email.com"
-                  {...register('email', { 
-                    required: 'البريد الإلكتروني مطلوب',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'البريد الإلكتروني غير صحيح'
-                    }
-                  })}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive font-ibm-plex-arabic">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-              
-              <Button type="submit" className="w-full font-ibm-plex-arabic flex items-center gap-2">
-                <Save size={18} />
-                حفظ المعلومات
-              </Button>
-            </form>
+            )}
           </CardContent>
         </Card>
         
