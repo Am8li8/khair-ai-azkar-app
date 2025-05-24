@@ -2,23 +2,107 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Moon, Sun, MessageCircle } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useForm } from 'react-hook-form';
+import { Moon, Sun, MessageCircle, Save } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface ProfileData {
+  name: string;
+  email: string;
+}
 
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [profileData, setProfileData] = useLocalStorage<ProfileData>('userProfile', {
+    name: '',
+    email: ''
+  });
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileData>({
+    defaultValues: profileData
+  });
+  
+  const onSubmit = (data: ProfileData) => {
+    setProfileData(data);
+    toast({
+      title: "تم الحفظ بنجاح",
+      description: "تم حفظ معلوماتك الشخصية",
+    });
+  };
   
   const handleSupportClick = () => {
     window.open('https://t.me/Am8li8', '_blank');
   };
+  
+  React.useEffect(() => {
+    reset(profileData);
+  }, [profileData, reset]);
   
   return (
     <div className="container py-6">
       <h1 className="text-3xl font-bold mb-6 text-center font-ibm-plex-arabic">الإعدادات</h1>
       
       <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-ibm-plex-arabic">المعلومات الشخصية</CardTitle>
+            <CardDescription className="font-ibm-plex-arabic">
+              أضف اسمك والبريد الإلكتروني
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="font-ibm-plex-arabic">الاسم</Label>
+                <Input
+                  id="name"
+                  placeholder="أدخل اسمك"
+                  className="font-ibm-plex-arabic"
+                  {...register('name', { required: 'الاسم مطلوب' })}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive font-ibm-plex-arabic">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="font-ibm-plex-arabic">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register('email', { 
+                    required: 'البريد الإلكتروني مطلوب',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'البريد الإلكتروني غير صحيح'
+                    }
+                  })}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive font-ibm-plex-arabic">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              
+              <Button type="submit" className="w-full font-ibm-plex-arabic flex items-center gap-2">
+                <Save size={18} />
+                حفظ المعلومات
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+        
         <Card>
           <CardHeader>
             <CardTitle className="font-ibm-plex-arabic">المظهر</CardTitle>
