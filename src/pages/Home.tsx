@@ -145,6 +145,9 @@ const Home: React.FC = () => {
     navigate('/azkar');
   };
 
+  // Show only the first category (wake-up remembrances)
+  const selectedCategory = allAzkarCategories[0];
+
   return (
     <div className="khair-container">
       <div className="flex justify-between items-center mb-6">
@@ -163,38 +166,31 @@ const Home: React.FC = () => {
           <p className="text-xl mb-4 font-ibm-plex-arabic">أهلاً بك في تطبيق خير للأذكار والأدعية</p>
         </div>
         
-        {/* Categories */}
+        {/* Single Selected Category */}
         <div>
-          <h2 className="text-2xl font-bold mb-4 font-ibm-plex-arabic">تصفح الأقسام</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {allAzkarCategories.map(category => {
-              const completedCount = completedZikrs[category.id]?.size || 0;
-              
-              return (
-                <Card 
-                  key={category.id} 
-                  className="cursor-pointer hover:border-khair-accent transition-colors"
-                  onClick={() => handleCategoryClick(category.id)}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg font-ibm-plex-arabic">{category.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      مجموعة من {category.title}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="pt-0 flex justify-between">
-                    <Badge variant="outline">{category.azkar.length} ذكر</Badge>
-                    {completedCount > 0 && (
-                      <Badge className="bg-khair-accent text-black">
-                        {completedCount} مكتمل
-                      </Badge>
-                    )}
-                  </CardFooter>
-                </Card>
-              );
-            })}
+          <h2 className="text-2xl font-bold mb-4 font-ibm-plex-arabic">القسم المختار</h2>
+          <div className="flex justify-center">
+            <Card 
+              className="cursor-pointer hover:border-khair-accent transition-colors border-khair-accent bg-khair-accent/10 max-w-sm"
+              onClick={() => handleCategoryClick(selectedCategory.id)}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-ibm-plex-arabic">{selectedCategory.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  مجموعة من {selectedCategory.title}
+                </p>
+              </CardContent>
+              <CardFooter className="pt-0 flex justify-between">
+                <Badge variant="outline">{selectedCategory.azkar.length} ذكر</Badge>
+                {(completedZikrs[selectedCategory.id]?.size || 0) > 0 && (
+                  <Badge className="bg-khair-accent text-black">
+                    {completedZikrs[selectedCategory.id]?.size || 0} مكتمل
+                  </Badge>
+                )}
+              </CardFooter>
+            </Card>
           </div>
         </div>
         
@@ -213,15 +209,15 @@ const Home: React.FC = () => {
           </div>
           
           <div className="space-y-4">
-            {allAzkarCategories[0].azkar.slice(0, 3).map((zikr, index) => {
-              const isCompleted = completedZikrs[allAzkarCategories[0].id]?.has(zikr.id);
-              const isFavorite = isZikrInFavorites(allAzkarCategories[0].id, zikr.id, zikr.text);
+            {selectedCategory.azkar.slice(0, 3).map((zikr, index) => {
+              const isCompleted = completedZikrs[selectedCategory.id]?.has(zikr.id);
+              const isFavorite = isZikrInFavorites(selectedCategory.id, zikr.id, zikr.text);
               
               return (
                 <Card 
                   key={zikr.id} 
                   className={`prayer-card overflow-hidden cursor-pointer ${isCompleted ? 'border-khair-accent bg-opacity-10' : ''}`}
-                  onClick={() => handleZikrCardClick(allAzkarCategories[0].id, index)}
+                  onClick={() => handleZikrCardClick(selectedCategory.id, index)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
@@ -264,7 +260,7 @@ const Home: React.FC = () => {
                       className="whitespace-pre-line text-lg font-ibm-plex-arabic"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleZikrClick(allAzkarCategories[0].id, zikr.id);
+                        handleZikrClick(selectedCategory.id, zikr.id);
                       }}
                     >
                       {zikr.text}
