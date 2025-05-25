@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { BookOpen, Check, Bookmark, BookmarkCheck } from 'lucide-react';
+import { BookOpen, Check, Bookmark, BookmarkCheck, Repeat } from 'lucide-react';
 
 interface FavoriteItem {
   type: "zikr" | "hadith";
@@ -231,7 +231,7 @@ const Home: React.FC = () => {
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <Badge variant={isCompleted ? "outline" : "default"} className="mb-2 flex items-center gap-1">
-                        <span className="material-icons text-sm">repeat</span>
+                        <Repeat size={14} />
                         {`${t('repeat')}: ${zikr.count}`}
                       </Badge>
                       <div className="flex gap-2">
