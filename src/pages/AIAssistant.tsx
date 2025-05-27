@@ -21,7 +21,7 @@ interface IslamicKnowledge {
 }
 
 const AIAssistant: React.FC = () => {
-  const defaultApiKey = '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';
+  const defaultApiKey = 'b209ea36322d218947e91936cfd3a013ac767b166ddec077166463063ca32698';
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
