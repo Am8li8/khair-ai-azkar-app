@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -22,6 +21,7 @@ interface IslamicKnowledge {
 }
 
 const AIAssistant: React.FC = () => {
+  const defaultApiKey = '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';
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -32,8 +32,8 @@ const AIAssistant: React.FC = () => {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
-  const [showApiInput, setShowApiInput] = useState(!apiKey);
+  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || defaultApiKey);
+  const [showApiInput, setShowApiInput] = useState(false);
 
   const islamicKnowledge: IslamicKnowledge[] = [
     {
@@ -202,15 +202,13 @@ const AIAssistant: React.FC = () => {
                 <Key className="h-4 w-4 ml-2" />
                 حفظ المفتاح
               </Button>
-              {apiKey && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowApiInput(false)}
-                  className="flex-1"
-                >
-                  استخدام بدون API
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                onClick={() => setShowApiInput(false)}
+                className="flex-1"
+              >
+                استخدام المفتاح الافتراضي
+              </Button>
             </div>
           </CardContent>
         </Card>
