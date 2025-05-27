@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Send, Bot, BookOpen, Heart, Star, Moon, Sun } from 'lucide-react';
+import { Send, Bot, BookOpen, Heart, Star, Moon, Sun, Key } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -18,7 +19,6 @@ interface IslamicKnowledge {
   category: string;
   icon: React.ElementType;
   questions: string[];
-  responses: { [key: string]: string };
 }
 
 const AIAssistant: React.FC = () => {
@@ -26,12 +26,14 @@ const AIAssistant: React.FC = () => {
     {
       id: 1,
       type: 'ai',
-      content: 'السلام عليكم ورحمة الله وبركاته. أنا مساعدك الذكي الإسلامي. يمكنني مساعدتك في الأذكار، الأدعية، أحكام الشريعة، والإرشاد الديني. كيف يمكنني خدمتك اليوم؟',
+      content: 'السلام عليكم ورحمة الله وبركاته. أنا مساعدك الذكي الإسلامي المدعوم بالذكاء الاصطناعي المتقدم. يمكنني مساعدتك في جميع الأمور الإسلامية بدقة عالية. كيف يمكنني خدمتك اليوم؟',
       timestamp: new Date()
     }
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
+  const [showApiInput, setShowApiInput] = useState(!apiKey);
 
   const islamicKnowledge: IslamicKnowledge[] = [
     {
@@ -42,13 +44,7 @@ const AIAssistant: React.FC = () => {
         'ما هي أذكار المساء؟',
         'دعاء النوم',
         'أذكار بعد الصلاة'
-      ],
-      responses: {
-        'ما هي أذكار الصباح؟': 'أذكار الصباح تشمل: آية الكرسي، المعوذات (الإخلاص والفلق والناس)، سبحان الله وبحمده 100 مرة، لا إله إلا الله وحده لا شريك له، أستغفر الله العظيم، والعديد من الأذكار الأخرى المأثورة عن النبي صلى الله عليه وسلم.',
-        'ما هي أذكار المساء؟': 'أذكار المساء مشابهة لأذكار الصباح وتشمل: آية الكرسي، المعوذات، سبحان الله وبحمده، أستغفر الله، ودعاء المساء "اللهم أمسينا وأمسى الملك لله".',
-        'دعاء النوم': '"باسمك اللهم أموت وأحيا" و "اللهم أسلمت نفسي إليك، وفوضت أمري إليك، وألجأت ظهري إليك، رغبة ورهبة إليك".',
-        'أذكار بعد الصلاة': 'تشمل: أستغفر الله ثلاثاً، اللهم أنت السلام ومنك السلام، سبحان الله 33 مرة، الحمد لله 33 مرة، الله أكبر 34 مرة.'
-      }
+      ]
     },
     {
       category: 'الأحكام الشرعية',
@@ -58,13 +54,7 @@ const AIAssistant: React.FC = () => {
         'شروط الصلاة',
         'أحكام الصيام',
         'آداب المسجد'
-      ],
-      responses: {
-        'أحكام الوضوء': 'الوضوء له فروض وسنن. الفروض: النية، غسل الوجه، غسل اليدين إلى المرفقين، مسح الرأس، غسل الرجلين إلى الكعبين، والترتيب والموالاة.',
-        'شروط الصلاة': 'شروط الصلاة تشمل: الطهارة، ستر العورة، استقبال القبلة، دخول الوقت، والنية.',
-        'أحكام الصيام': 'الصيام له أركان وشروط. من أركانه: النية والإمساك عن المفطرات من الفجر إلى المغرب.',
-        'آداب المسجد': 'من آداب المسجد: الدخول بالقدم اليمنى، الخروج بالقدم اليسرى، صلاة تحية المسجد، عدم رفع الصوت، والمحافظة على النظافة.'
-      }
+      ]
     },
     {
       category: 'الأخلاق والآداب',
@@ -74,18 +64,33 @@ const AIAssistant: React.FC = () => {
         'حقوق الجار',
         'آداب الطعام',
         'أخلاق المسلم'
-      ],
-      responses: {
-        'آداب التعامل مع الوالدين': 'برّ الوالدين واجب، ويشمل: الطاعة في المعروف، الإحسان إليهما، خفض الجناح لهما، وعدم قول "أف" لهما.',
-        'حقوق الجار': 'للجار حقوق عديدة منها: عدم إيذائه، الإحسان إليه، تفقد أحواله، كف الأذى عنه، وتحمل أذاه.',
-        'آداب الطعام': 'من آداب الطعام: التسمية قبل الأكل، الأكل باليمين، الأكل مما يلي الآكل، عدم الإسراف، والحمد بعد الانتهاء.',
-        'أخلاق المسلم': 'المسلم يتحلى بالصدق، الأمانة، الصبر، التواضع، الرحمة، العدل، والإحسان إلى الخلق.'
-      }
+      ]
     }
   ];
 
-  const handleSendMessage = () => {
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem('openai_api_key', apiKey);
+      setShowApiInput(false);
+      toast({
+        title: "تم حفظ مفتاح API",
+        description: "يمكنك الآن استخدام المساعد الذكي المتقدم"
+      });
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (!inputText.trim()) return;
+
+    if (!apiKey) {
+      toast({
+        title: "مفتاح API مطلوب",
+        description: "يرجى إدخال مفتاح OpenAI API أولاً",
+        variant: "destructive"
+      });
+      setShowApiInput(true);
+      return;
+    }
 
     const userMessage: Message = {
       id: messages.length + 1,
@@ -97,9 +102,8 @@ const AIAssistant: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
 
-    // Simulate AI response based on Islamic knowledge
-    setTimeout(() => {
-      const response = getIslamicResponse(inputText);
+    try {
+      const response = await getAIResponse(inputText);
       const aiMessage: Message = {
         id: messages.length + 2,
         type: 'ai',
@@ -108,57 +112,130 @@ const AIAssistant: React.FC = () => {
       };
 
       setMessages(prev => [...prev, aiMessage]);
-      setIsLoading(false);
-    }, 1000);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast({
+        title: "خطأ في الاتصال",
+        description: "حدث خطأ أثناء الحصول على الإجابة. تحقق من مفتاح API وحاول مرة أخرى.",
+        variant: "destructive"
+      });
+    }
 
+    setIsLoading(false);
     setInputText('');
   };
 
-  const getIslamicResponse = (question: string): string => {
-    const lowerQuestion = question.toLowerCase();
+  const getAIResponse = async (question: string): Promise<string> => {
+    const systemPrompt = `أنت مساعد ذكي إسلامي متخصص. لديك معرفة عميقة بالقرآن الكريم والسنة النبوية والفقه الإسلامي. 
     
-    // Search through Islamic knowledge base
-    for (const category of islamicKnowledge) {
-      for (const [key, response] of Object.entries(category.responses)) {
-        if (lowerQuestion.includes(key.toLowerCase()) || 
-            key.toLowerCase().includes(lowerQuestion)) {
-          return response;
-        }
-      }
-    }
-
-    // Default responses for common Islamic greetings and questions
-    if (lowerQuestion.includes('سلام') || lowerQuestion.includes('مرحبا')) {
-      return 'وعليكم السلام ورحمة الله وبركاته. أهلاً وسهلاً بك. كيف يمكنني مساعدتك في أمور دينك؟';
-    }
+    مهمتك:
+    - تقديم إجابات دقيقة ومفصلة باللغة العربية
+    - الاستشهاد بالآيات القرآنية والأحاديث النبوية عند الإمكان
+    - تقديم الأحكام الشرعية وفقاً لمذاهب أهل السنة والجماعة
+    - الرد بأسلوب واضح ومهذب
+    - في حالة عدم التأكد من إجابة معينة، اذكر ذلك وانصح بالرجوع للعلماء
     
-    if (lowerQuestion.includes('شكر') || lowerQuestion.includes('جزاك الله')) {
-      return 'وإياكم، بارك الله فيكم. أسأل الله أن ينفعنا وإياكم بما نتعلم.';
+    اجب على السؤال التالي بطريقة شاملة ومفيدة:`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: question
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get AI response');
     }
 
-    if (lowerQuestion.includes('قرآن') || lowerQuestion.includes('آية')) {
-      return 'القرآن الكريم هو كلام الله المنزل على سيدنا محمد صلى الله عليه وسلم. يمكنك سؤالي عن تفسير آيات معينة أو أحكام قرآنية محددة.';
-    }
-
-    if (lowerQuestion.includes('حديث') || lowerQuestion.includes('سنة')) {
-      return 'السنة النبوية هي المصدر الثاني للتشريع الإسلامي. يمكنني مساعدتك في فهم الأحاديث النبوية وتطبيقها في الحياة اليومية.';
-    }
-
-    return 'أعتذر، لم أتمكن من فهم سؤالك بوضوح. يمكنك سؤالي عن الأذكار، الأدعية، الأحكام الشرعية، الأخلاق الإسلامية، أو أي موضوع ديني آخر. حاول إعادة صياغة السؤال بشكل أوضح.';
+    const data = await response.json();
+    return data.choices[0].message.content;
   };
 
   const handleQuickQuestion = (question: string) => {
     setInputText(question);
   };
 
+  if (showApiInput) {
+    return (
+      <div className="khair-container min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center font-ibm-plex-arabic">
+              إعداد مفتاح OpenAI API
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground font-ibm-plex-arabic text-center">
+              لاستخدام المساعد الذكي المتقدم، يرجى إدخال مفتاح OpenAI API الخاص بك
+            </p>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="sk-..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground font-ibm-plex-arabic">
+                سيتم حفظ المفتاح محلياً في متصفحك
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={saveApiKey} className="flex-1">
+                <Key className="h-4 w-4 ml-2" />
+                حفظ المفتاح
+              </Button>
+              {apiKey && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowApiInput(false)}
+                  className="flex-1"
+                >
+                  استخدام بدون API
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="khair-container min-h-screen pb-20">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-center font-ibm-plex-arabic mb-2">
-          المساعد الذكي الإسلامي
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-center font-ibm-plex-arabic mb-2 flex-1">
+            المساعد الذكي الإسلامي
+          </h1>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowApiInput(true)}
+            className="p-2"
+          >
+            <Key className="h-4 w-4" />
+          </Button>
+        </div>
         <p className="text-center text-muted-foreground font-ibm-plex-arabic">
-          مساعدك في الأذكار والأحكام الشرعية والإرشاد الديني
+          مساعدك المدعوم بالذكاء الاصطناعي في الأذكار والأحكام الشرعية والإرشاد الديني
         </p>
       </div>
 
@@ -211,7 +288,7 @@ const AIAssistant: React.FC = () => {
                     {message.type === 'ai' && (
                       <Bot className="h-4 w-4 mt-1 text-khair-primary" />
                     )}
-                    <p className="font-ibm-plex-arabic text-sm leading-relaxed">
+                    <p className="font-ibm-plex-arabic text-sm leading-relaxed whitespace-pre-wrap">
                       {message.content}
                     </p>
                   </div>
@@ -222,7 +299,7 @@ const AIAssistant: React.FC = () => {
               <div className="flex justify-start">
                 <div className="bg-muted p-3 rounded-lg flex items-center gap-2">
                   <Bot className="h-4 w-4 text-khair-primary animate-pulse" />
-                  <span className="font-ibm-plex-arabic">جاري الكتابة...</span>
+                  <span className="font-ibm-plex-arabic">جاري الحصول على الإجابة...</span>
                 </div>
               </div>
             )}
@@ -237,7 +314,7 @@ const AIAssistant: React.FC = () => {
             <Textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="اكتب سؤالك هنا..."
+              placeholder="اسأل عن أي موضوع إسلامي..."
               className="font-ibm-plex-arabic resize-none"
               rows={2}
               onKeyPress={(e) => {
