@@ -1,11 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Send, Bot, BookOpen, Heart, Star, Moon, Sun, Key } from 'lucide-react';
+import { Send, Bot, BookOpen, Heart, Star, Moon, Sun } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -21,7 +21,7 @@ interface IslamicKnowledge {
 }
 
 const AIAssistant: React.FC = () => {
-  const defaultApiKey = 'b209ea36322d218947e91936cfd3a013ac767b166ddec077166463063ca32698';
+  const apiKey = 'AIzaSyDQYRg3kQf5Cya3rL1ZUAPaTIoiNSi4y14';
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -32,8 +32,6 @@ const AIAssistant: React.FC = () => {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || defaultApiKey);
-  const [showApiInput, setShowApiInput] = useState(false);
 
   const islamicKnowledge: IslamicKnowledge[] = [
     {
@@ -68,29 +66,8 @@ const AIAssistant: React.FC = () => {
     }
   ];
 
-  const saveApiKey = () => {
-    if (apiKey.trim()) {
-      localStorage.setItem('openai_api_key', apiKey);
-      setShowApiInput(false);
-      toast({
-        title: "تم حفظ مفتاح API",
-        description: "يمكنك الآن استخدام المساعد الذكي المتقدم"
-      });
-    }
-  };
-
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
-
-    if (!apiKey) {
-      toast({
-        title: "مفتاح API مطلوب",
-        description: "يرجى إدخال مفتاح OpenAI API أولاً",
-        variant: "destructive"
-      });
-      setShowApiInput(true);
-      return;
-    }
 
     const userMessage: Message = {
       id: messages.length + 1,
@@ -116,7 +93,7 @@ const AIAssistant: React.FC = () => {
       console.error('Error getting AI response:', error);
       toast({
         title: "خطأ في الاتصال",
-        description: "حدث خطأ أثناء الحصول على الإجابة. تحقق من مفتاح API وحاول مرة أخرى.",
+        description: "حدث خطأ أثناء الحصول على الإجابة. يرجى المحاولة مرة أخرى.",
         variant: "destructive"
       });
     }
@@ -137,26 +114,21 @@ const AIAssistant: React.FC = () => {
     
     اجب على السؤال التالي بطريقة شاملة ومفيدة:`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: question
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${question}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+        }
       }),
     });
 
@@ -165,73 +137,19 @@ const AIAssistant: React.FC = () => {
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.candidates[0].content.parts[0].text;
   };
 
   const handleQuickQuestion = (question: string) => {
     setInputText(question);
   };
 
-  if (showApiInput) {
-    return (
-      <div className="khair-container min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center font-ibm-plex-arabic">
-              إعداد مفتاح OpenAI API
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground font-ibm-plex-arabic text-center">
-              لاستخدام المساعد الذكي المتقدم، يرجى إدخال مفتاح OpenAI API الخاص بك
-            </p>
-            <div className="space-y-2">
-              <Input
-                type="password"
-                placeholder="sk-..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="font-mono"
-              />
-              <p className="text-xs text-muted-foreground font-ibm-plex-arabic">
-                سيتم حفظ المفتاح محلياً في متصفحك
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={saveApiKey} className="flex-1">
-                <Key className="h-4 w-4 ml-2" />
-                حفظ المفتاح
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowApiInput(false)}
-                className="flex-1"
-              >
-                استخدام المفتاح الافتراضي
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="khair-container min-h-screen pb-20">
       <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-center font-ibm-plex-arabic mb-2 flex-1">
-            المساعد الذكي الإسلامي
-          </h1>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setShowApiInput(true)}
-            className="p-2"
-          >
-            <Key className="h-4 w-4" />
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold text-center font-ibm-plex-arabic mb-2">
+          المساعد الذكي الإسلامي
+        </h1>
         <p className="text-center text-muted-foreground font-ibm-plex-arabic">
           مساعدك المدعوم بالذكاء الاصطناعي في الأذكار والأحكام الشرعية والإرشاد الديني
         </p>
