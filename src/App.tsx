@@ -11,7 +11,6 @@ import Home from "@/pages/Home";
 import Azkar from "@/pages/Azkar";
 import Settings from "@/pages/Settings";
 import Favorites from "@/pages/Favorites";
-import AIAssistant from "@/pages/AIAssistant";
 import NotFound from "@/pages/NotFound";
 import ZikrDetail from "@/pages/ZikrDetail";
 
@@ -31,7 +30,6 @@ const App = () => (
                   <Route path="/" element={<Home />} />
                   <Route path="/azkar" element={<Azkar />} />
                   <Route path="/azkar/:categoryId/:zikrIndex" element={<ZikrDetail />} />
-                  <Route path="/ai-assistant" element={<AIAssistant />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />

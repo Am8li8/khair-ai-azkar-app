@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Bookmark, Settings, BookOpen, Bot } from 'lucide-react';
+import { Home, Bookmark, Settings, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
@@ -21,11 +21,6 @@ const BottomNavBar: React.FC = () => {
       icon: BookOpen 
     },
     { 
-      name: 'المساعد الذكي', 
-      path: '/ai-assistant', 
-      icon: Bot 
-    },
-    { 
       name: 'المفضلة', 
       path: '/favorites', 
       icon: Bookmark 
@@ -39,7 +34,7 @@ const BottomNavBar: React.FC = () => {
   
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-4 h-16">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || 
                           (item.path !== '/' && location.pathname.startsWith(item.path));
