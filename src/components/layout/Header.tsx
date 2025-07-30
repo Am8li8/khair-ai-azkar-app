@@ -17,7 +17,7 @@ const Header: React.FC = () => {
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
             <img 
-              src="/lovable-uploads/5e9287d5-3df0-4ce9-b1ac-af90ac38383a.png" 
+              src="/lovable-uploads/b7d145d5-041f-4f8a-a667-cc8f0187b578.png" 
               alt={t('appName')} 
               className="h-28 w-auto"
               title={t('appName')}
